@@ -62,6 +62,15 @@ export function makeId(link, title) {
   return createHash('sha1').update(base).digest('hex').slice(0, 16);
 }
 
+/** 文字コードから文字へ。範囲外の値でも例外にしない。 */
+function safeChar(code) {
+  try {
+    return Number.isFinite(code) && code > 0 && code <= 0x10ffff ? String.fromCodePoint(code) : '';
+  } catch {
+    return '';
+  }
+}
+
 const stripHtml = (html) =>
   String(html ?? '')
     .replace(/<script[\s\S]*?<\/script>/gi, '')
@@ -72,7 +81,10 @@ const stripHtml = (html) =>
     .replace(/&lt;/g, '<')
     .replace(/&gt;/g, '>')
     .replace(/&quot;/g, '"')
-    .replace(/&#0?39;|&apos;/g, "'")
+    .replace(/&apos;/g, "'")
+    // &#8216; &#x2018; のような数値参照も戻す（英語圏のフィードで多い）
+    .replace(/&#(\d+);/g, (_, code) => safeChar(Number(code)))
+    .replace(/&#x([0-9a-f]+);/gi, (_, hex) => safeChar(parseInt(hex, 16)))
     .replace(/\s+/g, ' ')
     .trim();
 

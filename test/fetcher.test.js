@@ -77,3 +77,14 @@ test('fetchSource は成功時に正規化済み項目を返す', async () => {
   assert.equal(res.ok, true);
   assert.equal(res.items.length, 2);
 });
+
+test('数値文字参照を含む見出しを復元する', () => {
+  const xml =
+    '<?xml version="1.0"?><rss version="2.0"><channel>' +
+    '<item><title>Apple shares &amp;#8216;shocking evidence&amp;#8217; against &amp;#x2018;AI&amp;#x2019; claims &amp;amp; more</title>' +
+    '<link>https://e.test/1</link></item></channel></rss>';
+  assert.equal(
+    parseFeed(xml, aiSource)[0].title,
+    'Apple shares ‘shocking evidence’ against ‘AI’ claims & more',
+  );
+});
