@@ -40,7 +40,14 @@ Node.js をインストールできない場合は、**GitHubのサーバー側�
 
 `.github/workflows/news.yml` が30分ごとに動き、`scripts/build-site.js` が全フィードを取得して `docs/` を更新します。`docs/` をGitHub Pagesで配信すれば、URLを開くだけでニュースが読めます（ページ側は1分ごとに `news.json` を読み直すので、開きっぱなしでも自動で増えていきます）。
 
-公開先は **https://j-okazaki-maker.github.io/ec-ai-news/** です。ワークフローが Pages の有効化から配信までを行うので、設定画面の操作は要りません。
+**設定は最初の一度だけ（すべてブラウザ操作）**
+
+1. GitHubでこのリポジトリを開く → **Settings** → 左メニューの **Pages**
+2. 「Build and deployment」の Source で **Deploy from a branch** を選ぶ
+3. Branch を **`main`**、その隣のフォルダを **`/docs`** にして **Save**
+4. 数分待つと **https://j-okazaki-maker.github.io/ec-ai-news/** で開けるようになります
+
+以降はワークフローが `docs/` を更新するたびに、Pages が自動で配信し直します。
 
 > **注意:** GitHub Pages を**非公開リポジトリ**で使うには有料プラン（GitHub Pro など）が必要です。非公開で運用する場合は、下の「1枚のHTMLとして持ち出す」をご利用ください。
 

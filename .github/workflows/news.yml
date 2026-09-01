@@ -1,4 +1,4 @@
-name: ニュース取得と公開
+name: ニュース取得
 
 on:
   schedule:
@@ -9,9 +9,7 @@ on:
     branches: [main]
 
 permissions:
-  contents: write # docs/ の更新をコミットする
-  pages: write # GitHub Pages へ配信する
-  id-token: write # Pages のデプロイに必要
+  contents: write
 
 concurrency:
   group: news-fetch
@@ -36,6 +34,8 @@ jobs:
       - name: 1枚で完結するHTMLも書き出す
         run: node scripts/build-standalone.js
 
+      # docs/ を main に押し込むと、GitHub Pages（Deploy from a branch = main / docs）が
+      # 自動で配信し直す。Pages 側の設定は一度だけ画面から行う。
       - name: 変更があればコミット
         run: |
           git config user.name  'github-actions[bot]'
@@ -45,26 +45,6 @@ jobs:
             echo '更新はありませんでした'
           else
             git commit -m "ニュースを更新 ($(date -u '+%Y-%m-%d %H:%M UTC'))"
-            # 取得の実行中に別のコミットが入ることがあるので、取り込んでから押し込む
             git pull --rebase --autostash origin "${GITHUB_REF_NAME}"
             git push origin "HEAD:${GITHUB_REF_NAME}"
           fi
-
-      # Pages が未設定なら enablement: true が有効化する（設定画面の操作が要らない）
-      - uses: actions/configure-pages@v5
-        with:
-          enablement: true
-
-      - uses: actions/upload-pages-artifact@v3
-        with:
-          path: docs
-
-  deploy:
-    needs: fetch
-    runs-on: ubuntu-latest
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-    steps:
-      - id: deployment
-        uses: actions/deploy-pages@v4
