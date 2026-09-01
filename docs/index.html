@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>EC × AI ニュース速報</title>
+  <meta name="description" content="EC業界とAI業界の最新ニュースを自動収集し、速報として随時更新するライブフィード" />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⚡</text></svg>" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Noto+Sans+JP:wght@400;700;900&display=swap" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="ticker" id="ticker" hidden>
+    <span class="ticker__label">速報</span>
+    <div class="ticker__viewport"><div class="ticker__track" id="tickerTrack"></div></div>
+  </div>
+
+  <header class="header">
+    <div class="header__row">
+      <h1 class="logo"><span class="logo__mark">⚡</span>EC <span class="logo__x">×</span> AI ニュース速報</h1>
+      <div class="status" id="status" data-state="connecting">
+        <span class="status__dot"></span><span class="status__text">接続中…</span>
+      </div>
+      <div class="header__actions">
+        <button id="notifyBtn" class="btn btn--ghost" type="button" title="注目ニュースをデスクトップ通知">🔔 通知オフ</button>
+        <button id="refreshBtn" class="btn" type="button" title="今すぐ取得 (R)">↻ 更新</button>
+      </div>
+    </div>
+
+    <div class="header__row header__row--controls">
+      <nav class="tabs" id="tabs" role="tablist">
+        <button class="tab is-active" data-category="all" role="tab">すべて<span class="tab__count" data-count="total">0</span></button>
+        <button class="tab" data-category="ec" role="tab">EC業界<span class="tab__count" data-count="ec">0</span></button>
+        <button class="tab" data-category="ai" role="tab">AI業界<span class="tab__count" data-count="ai">0</span></button>
+        <button class="tab" data-category="both" role="tab">EC×AI<span class="tab__count" data-count="both">0</span></button>
+      </nav>
+      <div class="filters">
+        <label class="switch"><input type="checkbox" id="hotOnly" /><span>注目のみ</span></label>
+        <select id="sourceFilter" class="select" aria-label="ソースで絞り込む"><option value="">すべてのソース</option></select>
+        <input id="search" class="search" type="search" placeholder="キーワード検索 (/)" aria-label="キーワード検索" />
+      </div>
+    </div>
+
+    <div class="meta">
+      <span id="lastUpdated">最終更新: —</span>
+      <span class="meta__sep">·</span>
+      <span id="itemCount">0 件</span>
+      <span class="meta__sep">·</span>
+      <button id="sourcesToggle" class="linklike" type="button">ソースの状態</button>
+    </div>
+  </header>
+
+  <button id="newBanner" class="new-banner" type="button" hidden></button>
+
+  <section id="sourcesPanel" class="sources" hidden>
+    <h2 class="sources__title">取得ソースの状態</h2>
+    <ul id="sourcesList" class="sources__list"></ul>
+  </section>
+
+  <main>
+    <ul id="feed" class="feed" aria-live="polite"></ul>
+    <p id="empty" class="empty" hidden>該当するニュースはまだありません。</p>
+    <div id="skeleton" class="feed">
+      <div class="skel"></div><div class="skel"></div><div class="skel"></div><div class="skel"></div>
+    </div>
+  </main>
+
+  <footer class="footer">
+    見出し・本文の著作権は各配信元に帰属します。リンク先で全文をご確認ください。
+  </footer>
+
+  <script src="app.js" type="module"></script>
+</body>
+</html>

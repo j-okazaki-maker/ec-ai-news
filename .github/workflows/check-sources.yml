@@ -1,0 +1,25 @@
+name: ソースの疎通確認
+
+# 手動実行のみ。どのフィードが取得できているかを確認する。
+on:
+  workflow_dispatch:
+    inputs:
+      urls:
+        description: '確認したいフィードURL（空白区切り）。空なら登録済みの全ソースを確認'
+        required: false
+        default: ''
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - run: npm ci
+      # 入力はコマンド行に直接展開せず、環境変数経由で渡す
+      - run: node scripts/check-sources.js $URLS
+        env:
+          URLS: ${{ inputs.urls }}

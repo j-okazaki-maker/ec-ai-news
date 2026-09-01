@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+  <title>Test AI Feed</title>
+  <entry>
+    <title>OpenAI unveils a new model for agents</title>
+    <link rel="edit" href="https://example.org/edit/1"/>
+    <link rel="alternate" href="https://example.org/posts/1"/>
+    <summary>The company announced a new foundation model.</summary>
+    <published>2026-09-01T00:10:00Z</published>
+  </entry>
+  <entry>
+    <title>Shopify launches AI agent for merchants</title>
+    <link href="https://example.org/posts/2"/>
+    <content type="html">&lt;p&gt;Retail commerce meets generative AI.&lt;/p&gt;</content>
+    <updated>2026-08-31T22:00:00Z</updated>
+  </entry>
+</feed>

@@ -1,0 +1,21 @@
+{
+  "_comment": "このファイルを sources.json にリネームすると、src/sources.js の既定値の代わりに読み込まれます。",
+  "sources": [
+    {
+      "id": "my-ec-feed",
+      "name": "自社EC情報",
+      "url": "https://example.com/feed",
+      "category": "ec",
+      "lang": "ja",
+      "enabled": true
+    },
+    {
+      "id": "my-ai-feed",
+      "name": "AI研究ブログ",
+      "url": "https://example.org/atom.xml",
+      "category": "ai",
+      "lang": "en",
+      "enabled": true
+    }
+  ]
+}

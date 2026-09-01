@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+         xmlns="http://purl.org/rss/1.0/" xmlns:dc="http://purl.org/dc/elements/1.1/">
+  <channel rdf:about="https://example.jp/">
+    <title>テストRDFフィード</title>
+    <link>https://example.jp/</link>
+  </channel>
+  <item rdf:about="https://example.jp/a">
+    <title>ECモール事業者がAIチャットボットを導入</title>
+    <link>https://example.jp/a</link>
+    <description>問い合わせ対応を自動化する。</description>
+    <dc:date>2026-09-01T07:15:00+09:00</dc:date>
+  </item>
+</rdf:RDF>
