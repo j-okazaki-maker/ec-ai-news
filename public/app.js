@@ -238,7 +238,7 @@ function refreshTimestamps() {
     time.textContent = relativeTime(time.dateTime);
   }
   if (state.lastUpdatedAt) {
-    el.lastUpdated.textContent = `最終更新: ${relativeTime(state.lastUpdatedAt)}`;
+    el.lastUpdated.textContent = `ニュース取得: ${relativeTime(state.lastUpdatedAt)}`;
   }
 }
 
@@ -281,6 +281,12 @@ async function getJson(url) {
   return res.json();
 }
 
+/**
+ * news.json は GitHub Pages の CDN に最大10分キャッシュされる。
+ * no-store はブラウザのキャッシュにしか効かないので、URL自体を毎回変えて取りに行く。
+ */
+const newsUrl = () => `news.json?t=${Date.now()}`;
+
 async function loadInitial() {
   try {
     if (window.__NEWS__) {
@@ -291,7 +297,7 @@ async function loadInitial() {
         absorb(await getJson('api/news?limit=300'));
         mode.kind = 'server';
       } catch {
-        absorb(await getJson('news.json')); // サーバがいなければ静的ファイルを読む
+        absorb(await getJson(newsUrl())); // サーバがいなければ静的ファイルを読む
         mode.kind = 'static';
       }
     }
@@ -414,7 +420,7 @@ function connectStream() {
 /** 静的配信のときは news.json を読み直して差分を取り込む。 */
 async function pollStatic() {
   try {
-    const data = await getJson('news.json');
+    const data = await getJson(newsUrl());
     if (Array.isArray(data.sources)) knownSources = data.sources;
     onNewItems(data.items || []);
     state.lastUpdatedAt = data.generatedAt || state.lastUpdatedAt;

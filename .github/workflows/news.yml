@@ -2,8 +2,8 @@ name: ニュース取得
 
 on:
   schedule:
-    # 30分ごと（GitHub の都合で数分ずれることがあります）
-    - cron: '*/30 * * * *'
+    # 10分ごと（GitHub Actions の最短は5分。混雑時は数分ずれることがあります）
+    - cron: '*/10 * * * *'
   workflow_dispatch: # 手動実行用
   push:
     branches: [main]
