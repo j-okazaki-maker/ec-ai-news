@@ -59,3 +59,26 @@ test('filter なしのソースは全件を取り込む', () => {
   const items = parseFeed(feed('ゴルフ練習場オープン', '楽天市場の新サービス'), { ...prSource, filter: false });
   assert.equal(items.length, 2);
 });
+
+test('企業・市場が動いた記事だけを見分けられる', () => {
+  // 自社サービスの宣伝リリース（「AI」と言っているだけ）
+  assert.equal(classify({ title: 'AI顔認証を活用した見守り支援システムの運用を開始' }, 'ai').events, 0);
+  assert.equal(classify({ title: '【新機能リリース】AIロープレに新機能を追加' }, 'ai').events, 0);
+
+  // 実際に動きがあった記事
+  assert.ok(classify({ title: 'AIスタートアップが10億円を資金調達' }, 'ai').events > 0);
+  assert.ok(classify({ title: 'Buyeeがトイズキングと連携し、OMO施策を開始' }, 'ec').events > 0);
+  assert.ok(classify({ title: 'JR東日本、対話AIプラットフォームの実証実験を開始' }, 'ai').events > 0);
+});
+
+test('eventOnly のソースは宣伝リリースを取り込まない', () => {
+  const source = { id: 'pr', name: 'PR', url: 'https://e.test/f', category: 'ec', lang: 'ja', filter: true, eventOnly: true };
+  const items = parseFeed(
+    feed(
+      'AI顔認証を活用した見守り支援システムの運用を開始',
+      '楽天市場に出店する企業がAIスタートアップを買収',
+    ),
+    source,
+  );
+  assert.deepEqual(items.map((i) => i.title), ['楽天市場に出店する企業がAIスタートアップを買収']);
+});

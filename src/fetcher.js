@@ -140,11 +140,15 @@ export function parseFeed(xml, source) {
     if (summary && squash(summary).startsWith(squash(title).slice(0, 24))) summary = '';
 
     const base = { title, summary };
-    const { category, tags, score, hot, strong } = classify(base, source.category);
+    const { category, tags, score, hot, strong, events } = classify(base, source.category);
 
     // filter 付きのソース（総合ニュースやプレスリリース）は、業界を名指しする語が
     // 出てこない記事を捨てる。「出店」「販売」だけの記事を拾わないため
     if (source.filter && strong.ec === 0 && strong.ai === 0) continue;
+
+    // eventOnly のソースは、企業・市場が動いた記事だけを拾う。自社サービスの
+    // 宣伝リリース（「AI」と言っているだけのもの）を落とすため
+    if (source.eventOnly && events === 0) continue;
 
     items.push({
       id: makeId(link, title),

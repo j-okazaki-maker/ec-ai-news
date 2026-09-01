@@ -44,17 +44,42 @@ const AI_KEYWORDS = [...AI_STRONG, ...AI_WEAK];
 
 /**
  * 速報スコアの加点キーワード。値が大きいほど「注目」扱いされやすい。
+ *
+ * event: true は「企業・市場が実際に動いた」ことを示す語。プレスリリースの
+ * ような雑多なフィードから、宣伝ではなく業界の動きだけを拾うのに使う。
+ * 「発表」「新機能」はどんな宣伝リリースにも出てくるので event: false。
  */
 const HOT_KEYWORDS = [
-  [['速報', '緊急', 'breaking'], 30],
-  [['発表', '公開', 'リリース', 'launch', 'launches', 'unveil', 'announce'], 12],
-  [['資金調達', '調達', 'funding', 'raises', 'series a', 'series b', 'ipo', '上場'], 20],
-  [['買収', '統合', 'acquisition', 'acquires', 'merger', '提携', '協業', 'partnership'], 18],
-  [['決算', '売上', '過去最高', 'earnings', 'revenue', 'quarterly'], 10],
-  [['障害', '不具合', '停止', 'outage', 'down', '流出', '漏えい', '漏洩', 'breach', 'hack'], 25],
-  [['規制', '法改正', '訴訟', 'lawsuit', 'regulation', 'ban', '行政指導'], 15],
-  [['撤退', '閉鎖', '倒産', 'shutdown', 'layoff', '人員削減'], 18],
-  [['新サービス', '新機能', '新モデル', 'new model', 'update', 'v2', 'ga提供'], 8],
+  { words: ['速報', '緊急', 'breaking'], weight: 30, event: true },
+  { words: ['発表', '公開', 'リリース', 'launch', 'launches', 'unveil', 'announce'], weight: 12, event: false },
+  {
+    words: ['資金調達', '調達', '出資', 'funding', 'raises', 'series a', 'series b', 'ipo', '上場'],
+    weight: 20,
+    event: true,
+  },
+  {
+    words: [
+      '買収', '統合', '合併', '子会社化', '事業譲渡', 'acquisition', 'acquires', 'merger',
+      '提携', '業務提携', '資本提携', '協業', 'partnership',
+    ],
+    weight: 18,
+    event: true,
+  },
+  { words: ['決算', '売上', '過去最高', '業績', 'earnings', 'revenue', 'quarterly'], weight: 10, event: true },
+  {
+    words: ['障害', '不具合', '停止', 'outage', 'down', '流出', '漏えい', '漏洩', 'breach', 'hack'],
+    weight: 25,
+    event: true,
+  },
+  { words: ['規制', '法改正', '訴訟', 'lawsuit', 'regulation', 'ban', '行政指導'], weight: 15, event: true },
+  // 単独の宣伝では出にくく、複数社が関わる動きを示す語
+  {
+    words: ['連携', '共同開発', '共同研究', '実証実験', '導入事例', '突破', 'pilot', 'partners with'],
+    weight: 10,
+    event: true,
+  },
+  { words: ['撤退', '閉鎖', '倒産', '参入', 'shutdown', 'layoff', '人員削減'], weight: 18, event: true },
+  { words: ['新サービス', '新機能', '新モデル', 'new model', 'update', 'v2', 'ga提供'], weight: 8, event: false },
 ];
 
 const norm = (s) => (s || '').toLowerCase();
@@ -99,12 +124,14 @@ export function classify(item, baseCategory) {
   }
 
   let score = 0;
+  let eventHits = 0;
   const tags = new Set();
-  for (const [keywords, weight] of HOT_KEYWORDS) {
-    const hits = countHits(text, keywords);
+  for (const { words, weight, event } of HOT_KEYWORDS) {
+    const hits = countHits(text, words);
     if (hits.length > 0) {
       score += weight;
       tags.add(hits[0]);
+      if (event) eventHits += 1;
     }
   }
   // EC × AI の交差記事はこのアプリの主題なので底上げする
@@ -122,6 +149,8 @@ export function classify(item, baseCategory) {
     // strong は業界を名指しする語だけを数えたもの
     matches: { ec: ecHits.length, ai: aiHits.length },
     strong: { ec: ecStrong.length, ai: aiStrong.length },
+    // 企業・市場が動いた記事か（宣伝リリースを落とすのに使う）
+    events: eventHits,
   };
 }
 

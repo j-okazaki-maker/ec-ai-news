@@ -12,6 +12,9 @@
  *  enabled  : false にすると取得しない
  *  filter   : true にすると、EC・AI のどちらにも関係しない記事を捨てる。
  *             総合ニュースやプレスリリースのフィードを混ぜるときに使う
+ *  eventOnly: true にすると、資金調達・買収・提携・決算・障害・規制など
+ *             「実際に動きがあった」記事だけを拾う。自社サービスの宣伝
+ *             リリースを落とすのに使う
  *
  * 取得できるかどうかは `node scripts/check-sources.js` で確認できます。
  */
@@ -67,6 +70,7 @@ export const DEFAULT_SOURCES = [
     category: 'ec',
     lang: 'ja',
     filter: true, // 全業種のプレスリリースが流れるので、EC・AI 関連だけに絞る
+    eventOnly: true, // さらに、資金調達・提携・買収など実際に動きがあったものだけ
     enabled: true,
   },
   {
