@@ -1,6 +1,18 @@
 import { XMLParser } from 'fast-xml-parser';
 import { createHash } from 'node:crypto';
 import { classify } from './classify.js';
+import { BLOCKED_PUBLISHERS } from './sources.js';
+
+/**
+ * 転載スパムの見出しは「… Hilary Duff (yQZIFEkh)」のように、末尾へ
+ * 無関係な語とランダムな英数字が付く。この形だけを狙って落とす。
+ */
+const SPAM_TITLE = /\(\s*[A-Za-z][A-Za-z0-9_-]*[0-9][A-Za-z0-9_-]*\s*\)\s*$/;
+
+const isBlockedPublisher = (name) => {
+  const lower = (name || '').toLowerCase();
+  return lower !== '' && BLOCKED_PUBLISHERS.some((b) => lower.includes(b.toLowerCase()));
+};
 
 const parser = new XMLParser({
   ignoreAttributes: false,
@@ -125,10 +137,12 @@ export function parseFeed(xml, source) {
     const publisher = stripHtml(text(entry.source));
     let displaySource = source.name;
     if (publisher) {
+      if (isBlockedPublisher(publisher)) continue;
       displaySource = publisher;
       const suffix = ` - ${publisher}`;
       if (title.endsWith(suffix)) title = title.slice(0, -suffix.length).trim();
     }
+    if (SPAM_TITLE.test(title)) continue;
 
     const summaryRaw =
       entry['content:encoded'] ?? entry.description ?? entry.summary ?? entry.content ?? '';

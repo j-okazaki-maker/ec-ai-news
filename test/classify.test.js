@@ -82,3 +82,23 @@ test('eventOnly のソースは宣伝リリースを取り込まない', () => {
   );
   assert.deepEqual(items.map((i) => i.title), ['楽天市場に出店する企業がAIスタートアップを買収']);
 });
+
+test('転載スパムの見出しと除外配信元は取り込まない', () => {
+  const source = { id: 'g', name: 'Googleニュース', url: 'https://e.test/f', category: 'ec', lang: 'ja' };
+  const item = (title, publisher) =>
+    `<item><title>${title}</title><link>https://e.test/${encodeURIComponent(title.slice(0, 8))}</link>` +
+    (publisher ? `<source url="https://x.test">${publisher}</source>` : '') +
+    '</item>';
+  const xml =
+    '<?xml version="1.0"?><rss version="2.0"><channel>' +
+    item('田中が山根の服をZOZOTOWNで購入！！ Cwu (yJliC2A0PL)', 'Mshale') + // 除外配信元
+    item('ネット通販の話題 (aB12cD34)', 'どこかのサイト') + // 見出し末尾がランダム文字列
+    item('Amazonの新機能について (TechCrunch)', 'TechCrunch') + // 数字がないので通常の括弧書き
+    item('楽天市場が新サービスを発表', 'ITmedia') +
+    '</channel></rss>';
+
+  assert.deepEqual(
+    parseFeed(xml, source).map((i) => i.source),
+    ['TechCrunch', 'ITmedia'],
+  );
+});

@@ -18,6 +18,15 @@
  *
  * 取得できるかどうかは `node scripts/check-sources.js` で確認できます。
  */
+/**
+ * 除外する配信元。Googleニュースは転載サイトやスパムも拾ってくるため、
+ * 名指しで落とす。気になる配信元が出てきたら、ここに名前を足すだけでよい。
+ * 判定は大文字小文字を無視した部分一致。
+ */
+export const BLOCKED_PUBLISHERS = [
+  'Mshale', // 動画の転載サイト。見出し末尾にランダムな文字列が付く
+];
+
 export const DEFAULT_SOURCES = [
   // ---------------- EC業界（国内） ----------------
   {
@@ -74,9 +83,18 @@ export const DEFAULT_SOURCES = [
     enabled: true,
   },
   {
+    id: 'webtan',
+    name: 'Web担当者Forum',
+    url: 'https://webtan.impress.co.jp/rss.xml',
+    category: 'ec',
+    lang: 'ja',
+    filter: true,
+    enabled: true,
+  },
+  {
     id: 'gnews-ec-ja',
     name: 'Googleニュース: EC/ネット通販',
-    url: 'https://news.google.com/rss/search?q=%28EC%E6%A5%AD%E7%95%8C+OR+%E3%83%8D%E3%83%83%E3%83%88%E9%80%9A%E8%B2%A9+OR+%E9%9B%BB%E5%AD%90%E5%95%86%E5%8F%96%E5%BC%95%29+when%3A7d&hl=ja&gl=JP&ceid=JP:ja',
+    url: 'https://news.google.com/rss/search?q=%28EC%E6%A5%AD%E7%95%8C+OR+%E3%83%8D%E3%83%83%E3%83%88%E9%80%9A%E8%B2%A9+OR+%E9%9B%BB%E5%AD%90%E5%95%86%E5%8F%96%E5%BC%95%29+when%3A2d&hl=ja&gl=JP&ceid=JP:ja',
     category: 'ec',
     lang: 'ja',
     enabled: true,
@@ -84,7 +102,7 @@ export const DEFAULT_SOURCES = [
   {
     id: 'gnews-ecmall-ja',
     name: 'Googleニュース: 楽天/Amazon/ZOZO',
-    url: 'https://news.google.com/rss/search?q=%28%E6%A5%BD%E5%A4%A9%E5%B8%82%E5%A0%B4+OR+Amazon%E3%82%B8%E3%83%A3%E3%83%91%E3%83%B3+OR+ZOZOTOWN+OR+Shopify%29+when%3A7d&hl=ja&gl=JP&ceid=JP:ja',
+    url: 'https://news.google.com/rss/search?q=%28%E6%A5%BD%E5%A4%A9%E5%B8%82%E5%A0%B4+OR+Amazon%E3%82%B8%E3%83%A3%E3%83%91%E3%83%B3+OR+ZOZOTOWN+OR+Shopify%29+when%3A2d&hl=ja&gl=JP&ceid=JP:ja',
     category: 'ec',
     lang: 'ja',
     enabled: true,
@@ -153,9 +171,36 @@ export const DEFAULT_SOURCES = [
     enabled: true,
   },
   {
+    id: 'itmedia-news',
+    name: 'ITmedia NEWS 速報',
+    url: 'https://rss.itmedia.co.jp/rss/2.0/news_bursts.xml',
+    category: 'ai',
+    lang: 'ja',
+    filter: true, // 総合ニュースなので EC・AI 関連だけ拾う
+    enabled: true,
+  },
+  {
+    id: 'cnet-japan',
+    name: 'CNET Japan',
+    url: 'https://feeds.japan.cnet.com/rss/cnet/all.rdf',
+    category: 'ai',
+    lang: 'ja',
+    filter: true,
+    enabled: true,
+  },
+  {
+    id: 'zdnet-japan',
+    name: 'ZDNET Japan',
+    url: 'https://feeds.japan.zdnet.com/rss/zdnet/all.rdf',
+    category: 'ai',
+    lang: 'ja',
+    filter: true,
+    enabled: true,
+  },
+  {
     id: 'gnews-ai-ja',
     name: 'Googleニュース: 生成AI',
-    url: 'https://news.google.com/rss/search?q=%28%E7%94%9F%E6%88%90AI+OR+%E5%A4%A7%E8%A6%8F%E6%A8%A1%E8%A8%80%E8%AA%9E%E3%83%A2%E3%83%87%E3%83%AB+OR+OpenAI+OR+Anthropic%29+when%3A7d&hl=ja&gl=JP&ceid=JP:ja',
+    url: 'https://news.google.com/rss/search?q=%28%E7%94%9F%E6%88%90AI+OR+%E5%A4%A7%E8%A6%8F%E6%A8%A1%E8%A8%80%E8%AA%9E%E3%83%A2%E3%83%87%E3%83%AB+OR+OpenAI+OR+Anthropic%29+when%3A2d&hl=ja&gl=JP&ceid=JP:ja',
     category: 'ai',
     lang: 'ja',
     enabled: true,
@@ -168,6 +213,15 @@ export const DEFAULT_SOURCES = [
     url: 'https://techcrunch.com/category/artificial-intelligence/feed/',
     category: 'ai',
     lang: 'en',
+    enabled: true,
+  },
+  {
+    id: 'techcrunch',
+    name: 'TechCrunch',
+    url: 'https://techcrunch.com/feed/',
+    category: 'ai',
+    lang: 'en',
+    filter: true,
     enabled: true,
   },
   {
