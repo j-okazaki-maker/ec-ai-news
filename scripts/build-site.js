@@ -11,7 +11,7 @@ import { existsSync, mkdirSync, readFileSync, writeFileSync, copyFileSync } from
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { NewsStore } from '../src/store.js';
-import { fetchAll } from '../src/fetcher.js';
+import { fetchAll, cleanSummary } from '../src/fetcher.js';
 import { DEFAULT_SOURCES } from '../src/sources.js';
 
 const ROOT = fileURLToPath(new URL('..', import.meta.url));
@@ -35,7 +35,8 @@ const store = new NewsStore({ file: null, maxItems: MAX_ITEMS });
 if (existsSync(NEWS_JSON)) {
   try {
     const prev = JSON.parse(readFileSync(NEWS_JSON, 'utf8'));
-    store.ingest(prev.items || []);
+    // 整形の規則を後から変えても、保存済みの記事に反映されるようにする
+    store.ingest((prev.items || []).map((i) => ({ ...i, summary: cleanSummary(i.summary) })));
     console.log(`前回までの記事: ${store.items.size} 件`);
   } catch (err) {
     console.warn(`既存の news.json を読めませんでした: ${err.message}`);
