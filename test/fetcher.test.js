@@ -88,3 +88,17 @@ test('数値文字参照を含む見出しを復元する', () => {
     'Apple shares ‘shocking evidence’ against ‘AI’ claims & more',
   );
 });
+
+test('要約から画像タグとURLを取り除く', () => {
+  const desc =
+    '[株式会社exmore] [画像1: https://prcdn.example/release_image/157081-1920x1080.png?width=536] ' +
+    '医療機関向けAI受付の販売連携を開始しました。詳細は https://example.com/news をご覧ください。';
+  const xml =
+    '<?xml version="1.0"?><rss version="2.0"><channel><item>' +
+    '<title>AI受付の販売連携を開始</title><link>https://e.test/1</link>' +
+    `<description>${desc}</description></item></channel></rss>`;
+  assert.equal(
+    parseFeed(xml, ecSource)[0].summary,
+    '[株式会社exmore] 医療機関向けAI受付の販売連携を開始しました。詳細は をご覧ください。',
+  );
+});

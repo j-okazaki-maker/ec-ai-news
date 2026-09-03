@@ -161,6 +161,13 @@ export function parseFeed(xml, source) {
     let summary = stripHtml(text(summaryRaw)).slice(0, 320);
     const publishedAt = parseDate(entry);
 
+    // プレスリリース配信サイトは要約に画像タグやURLを埋め込む。読めないので落とす
+    summary = summary
+      .replace(/\[画像\d*[^\]]*\]/g, ' ')
+      .replace(/https?:\/\/\S+/g, ' ')
+      .replace(/\s+/g, ' ')
+      .trim();
+
     // Googleニュースなどは要約が見出しの繰り返しになる。同じ文が2度並ぶだけなので捨てる
     const squash = (t) => t.replace(/\s+/g, '').toLowerCase();
     if (summary && squash(summary).startsWith(squash(title).slice(0, 24))) summary = '';
