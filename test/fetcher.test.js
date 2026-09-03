@@ -102,3 +102,12 @@ test('要約から画像タグとURLを取り除く', () => {
     '[株式会社exmore] 医療機関向けAI受付の販売連携を開始しました。詳細は をご覧ください。',
   );
 });
+
+test('途中で切れた画像タグの断片も取り除く', async () => {
+  const { cleanSummary } = await import('../src/fetcher.js');
+  // 字数制限で閉じ括弧ごと切れた要約
+  assert.equal(cleanSummary('[株式会社データX] [画像1:'), '[株式会社データX]');
+  // URLの直後の閉じ括弧を食べてしまわないこと
+  assert.equal(cleanSummary('[A社] [画像1: https://x.test/a.png?w=1] 本文です。'), '[A社] 本文です。');
+  assert.equal(cleanSummary('普通の要約です。'), '普通の要約です。');
+});

@@ -77,8 +77,11 @@ function safeChar(code) {
  */
 export const cleanSummary = (summary) =>
   String(summary || '')
+    // 閉じ括弧はURLの一部にしない（[画像1: https://…] の ] を食べないため）
+    .replace(/https?:\/\/[^\s\]）」』]+/g, ' ')
     .replace(/\[画像\d*[^\]]*\]/g, ' ')
-    .replace(/https?:\/\/\S+/g, ' ')
+    // 途中で切れて閉じ括弧が無い「[画像1:」のような断片も落とす
+    .replace(/\[画像\d*[^\]]*$/g, ' ')
     .replace(/\s+/g, ' ')
     .trim();
 
@@ -169,10 +172,9 @@ export function parseFeed(xml, source) {
 
     const summaryRaw =
       entry['content:encoded'] ?? entry.description ?? entry.summary ?? entry.content ?? '';
-    let summary = stripHtml(text(summaryRaw)).slice(0, 320);
+    let summary = cleanSummary(stripHtml(text(summaryRaw))).slice(0, 320);
     const publishedAt = parseDate(entry);
 
-    summary = cleanSummary(summary);
 
     // Googleニュースなどは要約が見出しの繰り返しになる。同じ文が2度並ぶだけなので捨てる
     const squash = (t) => t.replace(/\s+/g, '').toLowerCase();
