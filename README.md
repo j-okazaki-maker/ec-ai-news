@@ -76,7 +76,7 @@ Pages を使わない場合でも、同じワークフローが `docs/standalone
 
 ## ニュースソースを変える
 
-既定のソースは `src/sources.js` に定義しています（国内外のEC/AIメディアとGoogleニュース検索フィード）。
+既定のソースは `src/sources.js` に定義しています（国内のEC/AIメディアとGoogleニュース検索フィード）。
 コードを触らずに差し替えたい場合は、`config/sources.example.json` を `config/sources.json` にコピーして編集してください。起動時にそちらが優先されます。
 
 ```json

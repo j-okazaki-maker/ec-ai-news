@@ -35,8 +35,14 @@ const store = new NewsStore({ file: null, maxItems: MAX_ITEMS });
 if (existsSync(NEWS_JSON)) {
   try {
     const prev = JSON.parse(readFileSync(NEWS_JSON, 'utf8'));
-    // 整形の規則を後から変えても、保存済みの記事に反映されるようにする
-    store.ingest((prev.items || []).map((i) => ({ ...i, summary: cleanSummary(i.summary) })));
+    const live = new Set(enabled.map((s) => s.id));
+    store.ingest(
+      (prev.items || [])
+        // ソースを外したら、そのソースの記事も一覧から消えるようにする
+        .filter((i) => live.has(i.sourceId))
+        // 整形の規則を後から変えても、保存済みの記事に反映されるようにする
+        .map((i) => ({ ...i, summary: cleanSummary(i.summary) })),
+    );
     console.log(`前回までの記事: ${store.items.size} 件`);
   } catch (err) {
     console.warn(`既存の news.json を読めませんでした: ${err.message}`);
@@ -75,12 +81,12 @@ writeFileSync(
   JSON.stringify({
     generatedAt: new Date().toISOString(),
     stats: store.stats(),
-    sources: sources.map((s) => ({
+    sources: enabled.map((s) => ({
       id: s.id,
       name: s.name,
       category: s.category,
       lang: s.lang || 'ja',
-      enabled: s.enabled !== false,
+      enabled: true,
       status: status[s.id] || null,
     })),
     items: store.list({ limit: MAX_ITEMS }),

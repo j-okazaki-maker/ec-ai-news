@@ -115,7 +115,7 @@ export const DEFAULT_SOURCES = [
     url: 'https://www.digitalcommerce360.com/feed/',
     category: 'ec',
     lang: 'en',
-    enabled: true,
+    enabled: false, // 英語のため無効化
   },
   {
     id: 'retaildive',
@@ -123,7 +123,7 @@ export const DEFAULT_SOURCES = [
     url: 'https://www.retaildive.com/feeds/news/',
     category: 'ec',
     lang: 'en',
-    enabled: true,
+    enabled: false, // 英語のため無効化
   },
 
   // ---------------- AI業界（国内） ----------------
@@ -213,7 +213,7 @@ export const DEFAULT_SOURCES = [
     url: 'https://techcrunch.com/category/artificial-intelligence/feed/',
     category: 'ai',
     lang: 'en',
-    enabled: true,
+    enabled: false, // 英語のため無効化
   },
   {
     id: 'techcrunch',
@@ -222,7 +222,7 @@ export const DEFAULT_SOURCES = [
     category: 'ai',
     lang: 'en',
     filter: true,
-    enabled: true,
+    enabled: false, // 英語のため無効化
   },
   {
     id: 'venturebeat-ai',
@@ -230,7 +230,7 @@ export const DEFAULT_SOURCES = [
     url: 'https://venturebeat.com/category/ai/feed/',
     category: 'ai',
     lang: 'en',
-    enabled: true,
+    enabled: false, // 英語のため無効化
   },
   {
     id: 'theverge-ai',
@@ -238,7 +238,7 @@ export const DEFAULT_SOURCES = [
     url: 'https://www.theverge.com/rss/ai-artificial-intelligence/index.xml',
     category: 'ai',
     lang: 'en',
-    enabled: true,
+    enabled: false, // 英語のため無効化
   },
   {
     id: 'openai-news',
@@ -246,7 +246,7 @@ export const DEFAULT_SOURCES = [
     url: 'https://openai.com/news/rss.xml',
     category: 'ai',
     lang: 'en',
-    enabled: true,
+    enabled: false, // 英語のため無効化
   },
   {
     id: 'googleblog-ai',
@@ -254,6 +254,6 @@ export const DEFAULT_SOURCES = [
     url: 'https://blog.google/technology/ai/rss/',
     category: 'ai',
     lang: 'en',
-    enabled: true,
+    enabled: false, // 英語のため無効化
   },
 ];
