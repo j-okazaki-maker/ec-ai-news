@@ -148,6 +148,27 @@ export function extractEntries(xml) {
   return [];
 }
 
+/**
+ * ソースごとの取り込み規則を1か所にまとめる。取得時だけでなく、
+ * 保存済みの記事を読み直すときにも同じ判定を当てるために使う。
+ *
+ * @param {{title:string, summary?:string}} item
+ * @param {object} source ソース定義（filter / eventOnly / noPromo を見る）
+ * @returns {boolean} 一覧に載せてよければ true
+ */
+export function passesSourceRules(item, source) {
+  if (!source) return false;
+  const { strong, events } = classify({ title: item.title, summary: item.summary }, source.category);
+
+  // filter: EC・AI を名指しする語が出てこない記事を捨てる
+  if (source.filter && strong.ec === 0 && strong.ai === 0) return false;
+  // eventOnly: 企業・市場が動いた記事だけを拾う
+  if (source.eventOnly && events === 0) return false;
+  // noPromo: 消費者向けの商品PR（セール告知・新商品紹介）を捨てる
+  if (source.noPromo && isConsumerPromo(item.title)) return false;
+  return true;
+}
+
 /** フィード本文（XML文字列）を正規化済みニュース項目の配列に変換する。 */
 export function parseFeed(xml, source) {
   const entries = extractEntries(xml);
@@ -181,19 +202,9 @@ export function parseFeed(xml, source) {
     if (summary && squash(summary).startsWith(squash(title).slice(0, 24))) summary = '';
 
     const base = { title, summary };
-    const { category, tags, score, hot, strong, events } = classify(base, source.category);
+    const { category, tags, score, hot } = classify(base, source.category);
 
-    // filter 付きのソース（総合ニュースやプレスリリース）は、業界を名指しする語が
-    // 出てこない記事を捨てる。「出店」「販売」だけの記事を拾わないため
-    if (source.filter && strong.ec === 0 && strong.ai === 0) continue;
-
-    // eventOnly のソースは、企業・市場が動いた記事だけを拾う。自社サービスの
-    // 宣伝リリース（「AI」と言っているだけのもの）を落とすため
-    if (source.eventOnly && events === 0) continue;
-
-    // noPromo のソースは、消費者向けの商品PR（セール告知・新商品紹介）を落とす。
-    // 「Amazon」「楽天市場」に反応して拾ってしまう買い物情報を除くため
-    if (source.noPromo && isConsumerPromo(title)) continue;
+    if (!passesSourceRules(base, source)) continue;
 
     items.push({
       id: makeId(link, title),

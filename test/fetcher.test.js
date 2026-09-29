@@ -111,3 +111,19 @@ test('途中で切れた画像タグの断片も取り除く', async () => {
   assert.equal(cleanSummary('[A社] [画像1: https://x.test/a.png?w=1] 本文です。'), '[A社] 本文です。');
   assert.equal(cleanSummary('普通の要約です。'), '普通の要約です。');
 });
+
+test('passesSourceRules は保存済みの記事にも同じ判定を当てられる', async () => {
+  const { passesSourceRules } = await import('../src/fetcher.js');
+  const gnews = { id: 'g', name: 'Googleニュース', category: 'ec', noPromo: true };
+
+  assert.equal(passesSourceRules({ title: '「ジョージア ブラック」24本が楽天市場でお得' }, gnews), false);
+  assert.equal(passesSourceRules({ title: '楽天市場、出店企業向けの新機能を提供開始' }, gnews), true);
+
+  // ソースを外した記事（定義が見つからない）は載せない
+  assert.equal(passesSourceRules({ title: 'なにかの記事' }, undefined), false);
+
+  // filter / eventOnly も同じ関数で効く
+  const pr = { id: 'pr', name: 'PR', category: 'ec', filter: true, eventOnly: true };
+  assert.equal(passesSourceRules({ title: 'ゴルフ練習場が新規オープン' }, pr), false);
+  assert.equal(passesSourceRules({ title: '楽天市場の店舗運営支援でA社とB社が提携' }, pr), true);
+});
