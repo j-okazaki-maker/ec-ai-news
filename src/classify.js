@@ -82,6 +82,27 @@ const HOT_KEYWORDS = [
   { words: ['新サービス', '新機能', '新モデル', 'new model', 'update', 'v2', 'ga提供'], weight: 8, event: false },
 ];
 
+/**
+ * 消費者向けの商品PR（セール告知・新商品紹介）を示す語。
+ * Googleニュース検索や総合ITメディアは「Amazon」「楽天市場」という語だけで
+ * こうした記事を大量に拾ってくるため、業界ニュースと切り分ける。
+ */
+const PROMO_WORDS =
+  /新発売|発売|販売開始|予約受付|予約開始|セール|[％%]OFF|割引|キャンペーン|プレゼント|お得|税込|新登場|登場！|新商品|先行販売|クラウドファンディング|数量限定|送料無料|好評発売中/;
+
+/** 企業・市場が動いたことを示す語。これがあれば商品PRとは見なさない。 */
+const BUSINESS_WORDS =
+  /出店|オープン|提供|新機能|導入|参入|提携|連携|買収|資金調達|決算|調査|戦略|事業|流通総額|売上/;
+
+/**
+ * 「業界ニュースではなく、消費者向けの商品PR」かどうか。
+ * @param {string} title 見出し
+ */
+export function isConsumerPromo(title) {
+  const t = String(title || '');
+  return PROMO_WORDS.test(t) && !BUSINESS_WORDS.test(t);
+}
+
 const norm = (s) => (s || '').toLowerCase();
 
 function countHits(haystack, keywords) {

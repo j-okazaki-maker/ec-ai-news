@@ -102,3 +102,29 @@ test('転載スパムの見出しと除外配信元は取り込まない', () =>
     ['TechCrunch', 'ITmedia'],
   );
 });
+
+test('消費者向けの商品PRと業界ニュースを見分ける', async () => {
+  const { isConsumerPromo } = await import('../src/classify.js');
+
+  // 買い物情報（業界ニュースではない）
+  assert.equal(isConsumerPromo('「ジョージア ブラック」ラベルレス24本がお得'), true);
+  assert.equal(isConsumerPromo('Switch 2用ソフト『ゼルダの伝説』が予約受付中！限定特典まとめ'), true);
+  assert.equal(isConsumerPromo('DODの「お財布ショルダーバッグ」が登場！ 旅行にも良さそう'), true);
+
+  // 企業・市場の動きが書かれていれば商品PR扱いにしない
+  assert.equal(isConsumerPromo('モトローラが「公式ストア楽天市場店」をオープン！数量限定セットも'), false);
+  assert.equal(isConsumerPromo('米アマゾン、自社ECサイトでも「プライム配送」導入を可能にする新機能'), false);
+  assert.equal(isConsumerPromo('Amazon、家族介護向け無料プログラムを提供 介護用品をお得に'), false);
+});
+
+test('noPromo のソースは買い物情報を取り込まない', () => {
+  const source = { id: 'g', name: 'Googleニュース', url: 'https://e.test/f', category: 'ec', lang: 'ja', noPromo: true };
+  const items = parseFeed(
+    feed(
+      '「ジョージア ブラック」ラベルレス24本が楽天市場でお得',
+      '楽天市場に出店する企業向けの新機能を提供開始',
+    ),
+    source,
+  );
+  assert.deepEqual(items.map((i) => i.title), ['楽天市場に出店する企業向けの新機能を提供開始']);
+});

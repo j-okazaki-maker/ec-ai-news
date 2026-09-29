@@ -1,6 +1,6 @@
 import { XMLParser } from 'fast-xml-parser';
 import { createHash } from 'node:crypto';
-import { classify } from './classify.js';
+import { classify, isConsumerPromo } from './classify.js';
 import { BLOCKED_PUBLISHERS } from './sources.js';
 
 /**
@@ -190,6 +190,10 @@ export function parseFeed(xml, source) {
     // eventOnly のソースは、企業・市場が動いた記事だけを拾う。自社サービスの
     // 宣伝リリース（「AI」と言っているだけのもの）を落とすため
     if (source.eventOnly && events === 0) continue;
+
+    // noPromo のソースは、消費者向けの商品PR（セール告知・新商品紹介）を落とす。
+    // 「Amazon」「楽天市場」に反応して拾ってしまう買い物情報を除くため
+    if (source.noPromo && isConsumerPromo(title)) continue;
 
     items.push({
       id: makeId(link, title),

@@ -12,6 +12,9 @@
  *  enabled  : false にすると取得しない
  *  filter   : true にすると、EC・AI のどちらにも関係しない記事を捨てる。
  *             総合ニュースやプレスリリースのフィードを混ぜるときに使う
+ *  noPromo  : true にすると、消費者向けの商品PR（セール告知・新商品紹介）を
+ *             落とす。「Amazon」「楽天市場」に反応して買い物情報を拾ってしまう
+ *             検索フィードや総合ITメディアに付ける
  *  eventOnly: true にすると、資金調達・買収・提携・決算・障害・規制など
  *             「実際に動きがあった」記事だけを拾う。自社サービスの宣伝
  *             リリースを落とすのに使う
@@ -142,6 +145,7 @@ export const DEFAULT_SOURCES = [
     url: 'https://news.google.com/rss/search?q=%28EC%E6%A5%AD%E7%95%8C+OR+%E3%83%8D%E3%83%83%E3%83%88%E9%80%9A%E8%B2%A9+OR+%E9%9B%BB%E5%AD%90%E5%95%86%E5%8F%96%E5%BC%95%29+when%3A2d&hl=ja&gl=JP&ceid=JP:ja',
     category: 'ec',
     lang: 'ja',
+    noPromo: true, // 消費者向けの商品PR（セール・新商品紹介）を落とす
     enabled: true,
   },
   {
@@ -150,6 +154,7 @@ export const DEFAULT_SOURCES = [
     url: 'https://news.google.com/rss/search?q=%28%E6%A5%BD%E5%A4%A9%E5%B8%82%E5%A0%B4+OR+Amazon%E3%82%B8%E3%83%A3%E3%83%91%E3%83%B3+OR+ZOZOTOWN+OR+Shopify%29+when%3A2d&hl=ja&gl=JP&ceid=JP:ja',
     category: 'ec',
     lang: 'ja',
+    noPromo: true, // 消費者向けの商品PR（セール・新商品紹介）を落とす
     enabled: true,
   },
 
@@ -267,6 +272,7 @@ export const DEFAULT_SOURCES = [
     category: 'ai',
     lang: 'ja',
     filter: true,
+    noPromo: true, // 消費者向けの商品PR（セール・新商品紹介）を落とす
     enabled: true,
   },
   {
@@ -275,6 +281,7 @@ export const DEFAULT_SOURCES = [
     url: 'https://news.google.com/rss/search?q=%28%E7%94%9F%E6%88%90AI+OR+%E5%A4%A7%E8%A6%8F%E6%A8%A1%E8%A8%80%E8%AA%9E%E3%83%A2%E3%83%87%E3%83%AB+OR+OpenAI+OR+Anthropic%29+when%3A2d&hl=ja&gl=JP&ceid=JP:ja',
     category: 'ai',
     lang: 'ja',
+    noPromo: true, // 消費者向けの商品PR（セール・新商品紹介）を落とす
     enabled: true,
   },
 
