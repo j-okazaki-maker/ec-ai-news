@@ -50,7 +50,7 @@ if (existsSync(NEWS_JSON)) {
   }
 }
 
-const results = await fetchAll(enabled, { concurrency: 5, timeoutMs: 20_000 });
+const results = await fetchAll(enabled, { concurrency: 5, timeoutMs: 30_000 });
 
 const collected = [];
 for (const res of results) {

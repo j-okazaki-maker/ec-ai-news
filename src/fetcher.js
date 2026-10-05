@@ -148,6 +148,12 @@ export function extractEntries(xml) {
   return [];
 }
 
+/** ひらがな・カタカナ・漢字のいずれかを含むか（日本語の記事かの簡易判定）。 */
+const JA_CHARS = /[\u3041-\u309f\u30a1-\u30ff\u3400-\u4dbf\u4e00-\u9fff]/;
+export function hasJapanese(text) {
+  return JA_CHARS.test(String(text || ''));
+}
+
 /**
  * ソースごとの取り込み規則を1か所にまとめる。取得時だけでなく、
  * 保存済みの記事を読み直すときにも同じ判定を当てるために使う。
@@ -158,6 +164,10 @@ export function extractEntries(xml) {
  */
 export function passesSourceRules(item, source) {
   if (!source) return false;
+
+  // lang: 'ja' のソースなのに日本語が出てこない記事（海外メディアの転載など）は捨てる
+  if ((source.lang || 'ja') === 'ja' && !hasJapanese(item.title)) return false;
+
   const { strong, events } = classify({ title: item.title, summary: item.summary }, source.category);
 
   // filter: EC・AI を名指しする語が出てこない記事を捨てる

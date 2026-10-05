@@ -127,3 +127,23 @@ test('passesSourceRules は保存済みの記事にも同じ判定を当てら�
   assert.equal(passesSourceRules({ title: 'ゴルフ練習場が新規オープン' }, pr), false);
   assert.equal(passesSourceRules({ title: '楽天市場の店舗運営支援でA社とB社が提携' }, pr), true);
 });
+
+test('日本語を含まない記事は lang:ja のソースから落とす', async () => {
+  const { passesSourceRules, hasJapanese } = await import('../src/fetcher.js');
+  const gnews = { id: 'g', name: 'Googleニュース', category: 'ai', lang: 'ja', noPromo: true };
+
+  // Googleニュースの日本語クエリにまぎれこむ海外メディアの見出し
+  assert.equal(passesSourceRules({ title: 'Broadcom Bets $102 Billion on Anthropic Chips' }, gnews), false);
+  assert.equal(passesSourceRules({ title: 'OpenAIが新モデルを発表' }, gnews), true);
+
+  // 英語ソース（lang:en）を有効にしたときは落とさない
+  const en = { id: 'e', name: 'TechCrunch', category: 'ai', lang: 'en' };
+  assert.equal(passesSourceRules({ title: 'Broadcom Bets $102 Billion on Anthropic Chips' }, en), true);
+
+  assert.equal(hasJapanese('ひらがな'), true);
+  assert.equal(hasJapanese('カタカナ'), true);
+  assert.equal(hasJapanese('漢字'), true);
+  assert.equal(hasJapanese('ASCII only 123'), false);
+  assert.equal(hasJapanese(''), false);
+  assert.equal(hasJapanese(undefined), false);
+});
