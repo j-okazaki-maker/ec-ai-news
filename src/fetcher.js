@@ -179,8 +179,12 @@ export function passesSourceRules(item, source) {
   return true;
 }
 
-/** フィード本文（XML文字列）を正規化済みニュース項目の配列に変換する。 */
-export function parseFeed(xml, source) {
+/**
+ * フィード本文（XML文字列）を正規化済みニュース項目の配列に変換する。
+ * applyRules: false にすると取り込み規則（filter/eventOnly/noPromo/言語）を当てない。
+ * ソースの下調べで「規則で何が落ちているか」を見るために使う。
+ */
+export function parseFeed(xml, source, { applyRules = true } = {}) {
   const entries = extractEntries(xml);
   const items = [];
 
@@ -214,7 +218,7 @@ export function parseFeed(xml, source) {
     const base = { title, summary };
     const { category, tags, score, hot } = classify(base, source.category);
 
-    if (!passesSourceRules(base, source)) continue;
+    if (applyRules && !passesSourceRules(base, source)) continue;
 
     items.push({
       id: makeId(link, title),
@@ -239,9 +243,13 @@ export function parseFeed(xml, source) {
 
 /**
  * 1ソースを取得して正規化する。ネットワーク・パース失敗は例外にせず結果に載せる。
- * @returns {Promise<{sourceId:string, ok:boolean, items:object[], error?:string, ms:number}>}
+ * includeRaw: true にすると、取り込み規則を当てる前の記事も rawItems に入れて返す。
+ * @returns {Promise<{sourceId:string, ok:boolean, items:object[], rawItems?:object[], error?:string, ms:number}>}
  */
-export async function fetchSource(source, { timeoutMs = 15000, fetchImpl = fetch } = {}) {
+export async function fetchSource(
+  source,
+  { timeoutMs = 15000, fetchImpl = fetch, includeRaw = false } = {},
+) {
   const startedAt = Date.now();
   try {
     const res = await fetchImpl(source.url, {
@@ -257,7 +265,9 @@ export async function fetchSource(source, { timeoutMs = 15000, fetchImpl = fetch
     }
     const xml = await res.text();
     const items = parseFeed(xml, source);
-    return { sourceId: source.id, ok: true, items, ms: Date.now() - startedAt };
+    const result = { sourceId: source.id, ok: true, items, ms: Date.now() - startedAt };
+    if (includeRaw) result.rawItems = parseFeed(xml, source, { applyRules: false });
+    return result;
   } catch (err) {
     const error = err?.name === 'TimeoutError' ? `タイムアウト (${timeoutMs}ms)` : String(err?.message || err);
     return { sourceId: source.id, ok: false, items: [], error, ms: Date.now() - startedAt };
