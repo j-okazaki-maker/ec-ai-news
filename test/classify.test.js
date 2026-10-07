@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { classify } from '../src/classify.js';
+import { classify, isAdTitle } from '../src/classify.js';
 import { parseFeed } from '../src/fetcher.js';
 
 test('EC と AI の両方に触れる記事は both になる', () => {
@@ -127,4 +127,33 @@ test('noPromo のソースは買い物情報を取り込まない', () => {
     source,
   );
   assert.deepEqual(items.map((i) => i.title), ['楽天市場に出店する企業向けの新機能を提供開始']);
+});
+
+test('EC の受け取り・配送まわりの語で流通・物流媒体の業界ニュースを拾う', () => {
+  const ec = (title) => classify({ title }, 'ec').strong.ec > 0;
+
+  // 流通・物流の専門媒体から拾いたい記事
+  assert.equal(ec('ヤマト運輸／9月の小口貨物取扱実績、宅配便は5.3％減'), true);
+  assert.equal(ec('原信・ナルス、「原信ナルス オンラインショップ」をリニューアル'), true);
+  assert.equal(ec('カインズ、次世代の統合サプライチェーン計画基盤にRELEXを採用'), true);
+  assert.equal(ec('イオンが集める購買データは4兆円超 業態の枠をなくす相互送客'), true);
+  assert.equal(ec('愛知県、手荷物当日配送と無人ロッカーを実証'), true);
+  assert.equal(ec('埼玉県：再配達削減に向けたモニター500人を募集、置き配バッグなど'), true);
+
+  // 店舗オープンや食品の新商品は引き続き拾わない
+  assert.equal(ec('ヤオコー、埼玉県入間市に「ヤオコーまるひろ入間SC店」オープン'), false);
+  assert.equal(ec('ファミマ／「無限クリーム」誕生、ホイップ使ったスイーツ6品発売'), false);
+  assert.equal(ec('サンエー 決算／3～8月増収増益、季節商材・食品・土産が好調'), false);
+});
+
+test('見出しの頭に広告表記が付いた記事は落とす', () => {
+  assert.equal(isAdTitle('【PR】【シリーズ】GLPはMarqへ（3）／顧客の成功から逆算する施設開発'), true);
+  assert.equal(isAdTitle('[PR] 物流施設の内覧会を開催'), true);
+  assert.equal(isAdTitle('【広告】ECサイト構築セミナー'), true);
+  assert.equal(isAdTitle('PR: 新しい倉庫管理システム'), true);
+
+  // 本文中の PR や、PR会社のニュースは落とさない
+  assert.equal(isAdTitle('プラップジャパン、世界最大のPR会社・米エデルマン傘下に'), false);
+  assert.equal(isAdTitle('PR TIMESが新機能を提供開始'), false);
+  assert.equal(isAdTitle('ヤマト運輸／宅配便の取扱実績を発表'), false);
 });

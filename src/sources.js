@@ -158,6 +158,35 @@ export const DEFAULT_SOURCES = [
     enabled: true,
   },
 
+  {
+    id: 'gnews-ecbuturyu-ja',
+    name: 'Googleニュース: EC物流/置き配',
+    url: 'https://news.google.com/rss/search?q=%28%E3%83%8D%E3%83%83%E3%83%88%E3%82%B9%E3%83%BC%E3%83%91%E3%83%BC%20OR%20%E7%BD%AE%E3%81%8D%E9%85%8D%20OR%20%E3%83%A9%E3%82%B9%E3%83%88%E3%83%AF%E3%83%B3%E3%83%9E%E3%82%A4%E3%83%AB%20OR%20EC%E7%89%A9%E6%B5%81%29%20when%3A2d&hl=ja&gl=JP&ceid=JP:ja',
+    category: 'ec',
+    lang: 'ja',
+    noPromo: true,
+    enabled: true,
+  },
+  {
+    id: 'gnews-ecglobal-ja',
+    name: 'Googleニュース: 越境EC/D2C',
+    url: 'https://news.google.com/rss/search?q=%28%E8%B6%8A%E5%A2%83EC%20OR%20D2C%20OR%20EC%E3%83%A2%E3%83%BC%E3%83%AB%29%20when%3A2d&hl=ja&gl=JP&ceid=JP:ja',
+    category: 'ec',
+    lang: 'ja',
+    filter: true, // 「D2C」などは無関係な記事も拾うので、EC・AI を名指しする語が要る
+    noPromo: true,
+    enabled: true,
+  },
+  {
+    id: 'lnews',
+    name: 'LNEWS（物流）',
+    url: 'https://www.lnews.jp/feed',
+    category: 'ec',
+    lang: 'ja',
+    filter: true, // 物流全般の媒体なので、EC・配送まわりの記事だけ拾う
+    enabled: true,
+  },
+
   // ---------------- EC業界（海外） ----------------
   {
     id: 'digitalcommerce360',

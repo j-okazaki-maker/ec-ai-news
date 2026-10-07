@@ -17,7 +17,10 @@ import { DEFAULT_SOURCES } from '../src/sources.js';
 const ROOT = fileURLToPath(new URL('..', import.meta.url));
 const DOCS = join(ROOT, 'docs');
 const NEWS_JSON = join(DOCS, 'news.json');
-const MAX_ITEMS = Number(process.env.MAX_ITEMS || 400);
+const MAX_ITEMS = Number(process.env.MAX_ITEMS || 600);
+// 1ソースあたりの上限。Googleニュース検索は1本で100件以上たまるため、
+// 上限をかけないと件数の少ない専門媒体が一覧から押し出されてしまう。
+const MAX_PER_SOURCE = Number(process.env.MAX_PER_SOURCE || 45);
 
 function loadSources() {
   const configPath = join(ROOT, 'config', 'sources.json');
@@ -29,7 +32,7 @@ function loadSources() {
 
 const sources = loadSources();
 const enabled = sources.filter((s) => s.enabled !== false);
-const store = new NewsStore({ file: null, maxItems: MAX_ITEMS });
+const store = new NewsStore({ file: null, maxItems: MAX_ITEMS, maxPerSource: MAX_PER_SOURCE });
 
 // 前回までの記事を読み込む（firstSeenAt はそのまま引き継がれる）
 if (existsSync(NEWS_JSON)) {
@@ -90,7 +93,7 @@ writeFileSync(
       enabled: true,
       status: status[s.id] || null,
     })),
-    items: store.list({ limit: MAX_ITEMS }),
+    items: store.list({ limit: MAX_ITEMS, maxPerSource: MAX_PER_SOURCE }),
   }),
 );
 

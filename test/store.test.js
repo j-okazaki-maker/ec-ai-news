@@ -140,3 +140,46 @@ test('間引き後も見出し索引が壊れない', () => {
   assert.equal(store.ingest([item('d', { title: '古い記事', link: 'https://x.test/d' })]).length, 1,
     '間引かれた記事の見出しは索引から消える');
 });
+
+test('maxPerSource は1ソースあたりの件数を揃える', () => {
+  const store = new NewsStore({ file: null, maxItems: 100 });
+  const at = (n) => new Date(Date.UTC(2026, 0, 1, 0, n)).toISOString();
+  const items = [];
+  // 件数の多い検索フィード10件と、更新の遅い専門媒体2件（こちらが古い）
+  for (let i = 0; i < 10; i += 1) {
+    items.push({ id: `g${i}`, title: `検索フィードの記事${i}`, link: `https://x.test/g${i}`, source: 'G', sourceId: 'gnews', publishedAt: at(20 + i) });
+  }
+  items.push({ id: 's1', title: '専門媒体の記事1', link: 'https://y.test/1', source: 'S', sourceId: 'senmon', publishedAt: at(1) });
+  items.push({ id: 's2', title: '専門媒体の記事2', link: 'https://y.test/2', source: 'S', sourceId: 'senmon', publishedAt: at(2) });
+  store.ingest(items);
+
+  // 上限5件だけなら、新しい検索フィードの記事で埋まってしまう
+  const plain = store.list({ limit: 5 });
+  assert.deepEqual([...new Set(plain.map((i) => i.sourceId))], ['gnews']);
+
+  // 1ソース3件までにすると、古い専門媒体の記事も残る
+  const fair = store.list({ limit: 5, maxPerSource: 3 });
+  assert.equal(fair.filter((i) => i.sourceId === 'gnews').length, 3);
+  assert.equal(fair.filter((i) => i.sourceId === 'senmon').length, 2);
+});
+
+test('maxPerSource を渡したストアは古い記事を捨てるときも件数を揃える', () => {
+  const store = new NewsStore({ file: null, maxItems: 100, maxPerSource: 2 });
+  const at = (n) => new Date(Date.UTC(2026, 0, 1, 0, n)).toISOString();
+  store.ingest(
+    [0, 1, 2, 3, 4].map((i) => ({
+      id: `g${i}`,
+      title: `記事${i}`,
+      link: `https://x.test/g${i}`,
+      source: 'G',
+      sourceId: 'gnews',
+      publishedAt: at(i),
+    })),
+  );
+  // 上限件数には余裕があるが、1ソース2件までなので新しい2件だけが残る
+  assert.equal(store.items.size, 2);
+  assert.deepEqual(
+    store.list({ limit: 10 }).map((i) => i.id),
+    ['g4', 'g3'],
+  );
+});

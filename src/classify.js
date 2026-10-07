@@ -16,6 +16,10 @@ const EC_STRONG = [
   'ZOZO', 'Shopify', 'メルカリ', 'Yahoo!ショッピング', 'PayPayモール', 'アスクル',
   'D2C', 'DtoC', 'OMO', 'ラストワンマイル', 'フルフィルメント', '受注管理',
   'ショッピングカート', 'マーケットプレイス', 'ネットスーパー', '通販サイト',
+  'オンラインショップ', 'オンラインショッピング', 'ライブコマース', 'ソーシャルコマース',
+  'クイックコマース', 'リテールメディア', '定期購入', '購買データ', 'ポイント経済圏',
+  // EC の受け取り・配送まわり。流通や物流の専門媒体から業界ニュースを拾うため
+  '置き配', '再配達', '当日配送', '宅配便', 'サプライチェーン', 'セルフレジ',
   'e-commerce', 'ecommerce', 'marketplace', 'checkout', 'fulfillment',
   'omnichannel', 'DTC', 'online retailer', 'online shopping',
 ];
@@ -98,6 +102,17 @@ const BUSINESS_WORDS =
  * 「業界ニュースではなく、消費者向けの商品PR」かどうか。
  * @param {string} title 見出し
  */
+/**
+ * 見出しの頭に付く広告表記。物流・流通の媒体は記事と同じ形で広告を配信するため、
+ * 配信元を問わず落とす。
+ */
+const AD_PREFIX = /^\s*(?:[【\[（(]\s*)?(?:PR|AD|ＰＲ|広告|スポンサード|タイアップ|提供)\s*(?:[】\])）]|[:：])/i;
+
+/** 広告記事の見出しかどうか。 */
+export function isAdTitle(title) {
+  return AD_PREFIX.test(String(title || ''));
+}
+
 export function isConsumerPromo(title) {
   const t = String(title || '');
   return PROMO_WORDS.test(t) && !BUSINESS_WORDS.test(t);

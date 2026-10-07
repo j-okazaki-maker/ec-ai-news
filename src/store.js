@@ -23,12 +23,16 @@ export function titleKey(title) {
  */
 export class NewsStore extends EventEmitter {
   /**
-   * @param {{file?:string|null, maxItems?:number}} options
+   * maxPerSource を渡すと、古い記事を捨てるときに1ソースあたりの件数も揃える。
+   * これがないと、記事数の多い検索フィードだけが残り、更新が遅い専門媒体の
+   * 記事が全部押し出されてしまう。
+   * @param {{file?:string|null, maxItems?:number, maxPerSource?:number}} options
    */
-  constructor({ file = null, maxItems = 1000 } = {}) {
+  constructor({ file = null, maxItems = 1000, maxPerSource = 0 } = {}) {
     super();
     this.file = file;
     this.maxItems = maxItems;
+    this.maxPerSource = maxPerSource;
     /** @type {Map<string, object>} */
     this.items = new Map();
     /** @type {Map<string, string>} 正規化した見出し -> 記事ID */
@@ -100,8 +104,8 @@ export class NewsStore extends EventEmitter {
   }
 
   #prune() {
-    if (this.items.size <= this.maxItems) return;
-    const keep = this.list({ limit: this.maxItems });
+    const keep = this.list({ limit: this.maxItems, maxPerSource: this.maxPerSource });
+    if (keep.length === this.items.size) return;
     this.items = new Map(keep.map((item) => [item.id, item]));
     this.#reindexTitles();
   }
@@ -124,9 +128,19 @@ export class NewsStore extends EventEmitter {
 
   /**
    * 絞り込み＋新しい順のソートを行う。
-   * @param {{category?:string, sourceId?:string, q?:string, hotOnly?:boolean, since?:string, limit?:number}} filter
+   * maxPerSource を渡すと、1ソースあたりの件数に上限をかける。記事数の多い
+   * 検索フィードが一覧を占領して、件数の少ない専門媒体が押し出されるのを防ぐ。
+   * @param {{category?:string, sourceId?:string, q?:string, hotOnly?:boolean, since?:string, limit?:number, maxPerSource?:number}} filter
    */
-  list({ category = 'all', sourceId = null, q = '', hotOnly = false, since = null, limit = 100 } = {}) {
+  list({
+    category = 'all',
+    sourceId = null,
+    q = '',
+    hotOnly = false,
+    since = null,
+    limit = 100,
+    maxPerSource = 0,
+  } = {}) {
     const needle = q.trim().toLowerCase();
     const sinceMs = since ? Date.parse(since) : null;
 
@@ -150,6 +164,16 @@ export class NewsStore extends EventEmitter {
     }
 
     rows.sort((a, b) => Date.parse(b.publishedAt) - Date.parse(a.publishedAt));
+
+    if (maxPerSource > 0) {
+      const perSource = new Map();
+      rows = rows.filter((r) => {
+        const n = (perSource.get(r.sourceId) || 0) + 1;
+        perSource.set(r.sourceId, n);
+        return n <= maxPerSource;
+      });
+    }
+
     return limit > 0 ? rows.slice(0, limit) : rows;
   }
 
