@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { classify, isAdTitle } from '../src/classify.js';
+import { classify, isAdTitle, isNonArticle } from '../src/classify.js';
 import { parseFeed } from '../src/fetcher.js';
 
 test('EC と AI の両方に触れる記事は both になる', () => {
@@ -156,4 +156,14 @@ test('見出しの頭に広告表記が付いた記事は落とす', () => {
   assert.equal(isAdTitle('プラップジャパン、世界最大のPR会社・米エデルマン傘下に'), false);
   assert.equal(isAdTitle('PR TIMESが新機能を提供開始'), false);
   assert.equal(isAdTitle('ヤマト運輸／宅配便の取扱実績を発表'), false);
+});
+
+test('写真ギャラリーやSNSのプロフィールページは記事として扱わない', () => {
+  assert.equal(isNonArticle('画像294 / 315＞不在票が入っていたけど、なぜか玄関前に置かれた荷物'), true);
+  assert.equal(isNonArticle('＜画像3 / 8＞“資源回収”も！多様化するネットスーパーの最新サービスとは？'), true);
+  assert.equal(isNonArticle('nimo (@nimoyama) on X'), true);
+
+  // 本物の記事は落とさない
+  assert.equal(isNonArticle('ヤマト運輸／9月の小口貨物取扱実績、宅配便は5.3％減'), false);
+  assert.equal(isNonArticle('楽天市場、画像生成AIで商品画像を自動作成する新機能'), false);
 });

@@ -113,6 +113,19 @@ export function isAdTitle(title) {
   return AD_PREFIX.test(String(title || ''));
 }
 
+/**
+ * 記事ではないページの見出し。Googleニュースは写真ギャラリーの1枚や
+ * SNSのプロフィールページも記事として流してくる。
+ */
+const GALLERY_TITLE = /^[＜<]?\s*画像\s*\d+\s*[/／]\s*\d+/;
+const SNS_PROFILE_TITLE = /\(@[A-Za-z0-9_]+\)\s*on\s*(X|Twitter|Instagram)$/i;
+
+/** 記事ではないページ（写真ギャラリー・SNSプロフィール）の見出しかどうか。 */
+export function isNonArticle(title) {
+  const t = String(title || '');
+  return GALLERY_TITLE.test(t) || SNS_PROFILE_TITLE.test(t);
+}
+
 export function isConsumerPromo(title) {
   const t = String(title || '');
   return PROMO_WORDS.test(t) && !BUSINESS_WORDS.test(t);

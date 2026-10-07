@@ -1,6 +1,6 @@
 import { XMLParser } from 'fast-xml-parser';
 import { createHash } from 'node:crypto';
-import { classify, isConsumerPromo, isAdTitle } from './classify.js';
+import { classify, isConsumerPromo, isAdTitle, isNonArticle } from './classify.js';
 import { BLOCKED_PUBLISHERS } from './sources.js';
 
 /**
@@ -165,8 +165,8 @@ export function hasJapanese(text) {
 export function passesSourceRules(item, source) {
   if (!source) return false;
 
-  // 【PR】付きの広告記事はどの配信元でも載せない
-  if (isAdTitle(item.title)) return false;
+  // 【PR】付きの広告記事、記事ではないページはどの配信元でも載せない
+  if (isAdTitle(item.title) || isNonArticle(item.title)) return false;
 
   // lang: 'ja' のソースなのに日本語が出てこない記事（海外メディアの転載など）は捨てる
   if ((source.lang || 'ja') === 'ja' && !hasJapanese(item.title)) return false;
