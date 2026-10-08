@@ -28,6 +28,8 @@
  */
 export const BLOCKED_PUBLISHERS = [
   'Mshale', // 動画の転載サイト。見出し末尾にランダムな文字列が付く
+  'Vietnam.vn', // ベトナム政府系記事の機械翻訳。日本の業界ニュースではない
+  'BUBKA', // グラビア・アイドル情報。「登場」という語でEC検索に引っかかる
 ];
 
 export const DEFAULT_SOURCES = [
@@ -247,6 +249,7 @@ export const DEFAULT_SOURCES = [
     category: 'ai',
     lang: 'ja',
     filter: true,
+    noPromo: true, // 製品レビュー・ガジェット紹介が多いので商品PRを落とす
     enabled: true,
   },
   {
@@ -256,6 +259,7 @@ export const DEFAULT_SOURCES = [
     category: 'ai',
     lang: 'ja',
     filter: true, // 総合ニュースなので EC・AI 関連だけ拾う
+    noPromo: true, // 製品レビュー・ガジェット紹介が多いので商品PRを落とす
     enabled: true,
   },
   {
@@ -265,6 +269,7 @@ export const DEFAULT_SOURCES = [
     category: 'ai',
     lang: 'ja',
     filter: true,
+    noPromo: true, // 製品レビュー・ガジェット紹介が多いので商品PRを落とす
     enabled: true,
   },
   {

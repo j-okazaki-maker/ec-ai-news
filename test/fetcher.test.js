@@ -147,3 +147,39 @@ test('日本語を含まない記事は lang:ja のソースから落とす', as
   assert.equal(hasJapanese(''), false);
   assert.equal(hasJapanese(undefined), false);
 });
+
+test('除外リストの配信元は保存済みの記事からも落とす', async () => {
+  const { passesSourceRules } = await import('../src/fetcher.js');
+  const gnews = { id: 'g', name: 'Googleニュース', category: 'ec', lang: 'ja' };
+
+  // Googleニュースは配信元を item.source に入れてくるので、そこで判定する
+  assert.equal(
+    passesSourceRules({ title: 'ドンナイ市：越境ECの推進', source: 'Vietnam.vn' }, gnews),
+    false,
+  );
+  assert.equal(
+    passesSourceRules({ title: '乃木坂46の撮り下ろしグラビア企画', source: 'BUBKA Web' }, gnews),
+    false,
+  );
+  assert.equal(
+    passesSourceRules({ title: '楽天市場、出店企業向けの新機能を提供開始', source: 'ECのミカタ' }, gnews),
+    true,
+  );
+  // 配信元が入っていない記事（通常のRSS）は落とさない
+  assert.equal(passesSourceRules({ title: '楽天市場、新機能を提供開始' }, gnews), true);
+});
+
+test('値段つきの商品紹介は noPromo のソースから落とす', async () => {
+  const { passesSourceRules } = await import('../src/fetcher.js');
+  const ascii = { id: 'a', name: 'ASCII.jp', category: 'ai', lang: 'ja', noPromo: true };
+
+  assert.equal(passesSourceRules({ title: '10万9800円の16型ノート、16GB＋512GBでWi-Fi 7まで' }, ascii), false);
+  assert.equal(passesSourceRules({ title: 'JAPANNEXTの4K IPSモニターがAmazon限定で登場' }, ascii), false);
+  assert.equal(passesSourceRules({ title: 'パソコン工房、100台限定のゲーミングPC！' }, ascii), false);
+  assert.equal(passesSourceRules({ title: 'チキンラーメン どんぶりがAmazonで1068円オフ' }, ascii), false);
+
+  // 金額が出てくる業界ニュースは残す
+  assert.equal(passesSourceRules({ title: 'AIスタートアップが30億円を資金調達' }, ascii), true);
+  assert.equal(passesSourceRules({ title: '楽天グループ決算、売上は2兆円超' }, ascii), true);
+  assert.equal(passesSourceRules({ title: 'OpenAI、新しい推論モデルを発表' }, ascii), true);
+});

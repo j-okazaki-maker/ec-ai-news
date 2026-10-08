@@ -23,16 +23,17 @@ export function titleKey(title) {
  */
 export class NewsStore extends EventEmitter {
   /**
-   * maxPerSource を渡すと、古い記事を捨てるときに1ソースあたりの件数も揃える。
-   * これがないと、記事数の多い検索フィードだけが残り、更新が遅い専門媒体の
-   * 記事が全部押し出されてしまう。
-   * @param {{file?:string|null, maxItems?:number, maxPerSource?:number}} options
+   * maxPerSource / minPerSource を渡すと、古い記事を捨てるときにも1ソース
+   * あたりの上限・下限を揃える。これがないと、記事数の多い検索フィードだけが
+   * 残り、更新が遅い専門媒体の記事が全部押し出されてしまう。
+   * @param {{file?:string|null, maxItems?:number, maxPerSource?:number, minPerSource?:number}} options
    */
-  constructor({ file = null, maxItems = 1000, maxPerSource = 0 } = {}) {
+  constructor({ file = null, maxItems = 1000, maxPerSource = 0, minPerSource = 0 } = {}) {
     super();
     this.file = file;
     this.maxItems = maxItems;
     this.maxPerSource = maxPerSource;
+    this.minPerSource = minPerSource;
     /** @type {Map<string, object>} */
     this.items = new Map();
     /** @type {Map<string, string>} 正規化した見出し -> 記事ID */
@@ -104,7 +105,11 @@ export class NewsStore extends EventEmitter {
   }
 
   #prune() {
-    const keep = this.list({ limit: this.maxItems, maxPerSource: this.maxPerSource });
+    const keep = this.list({
+      limit: this.maxItems,
+      maxPerSource: this.maxPerSource,
+      minPerSource: this.minPerSource,
+    });
     if (keep.length === this.items.size) return;
     this.items = new Map(keep.map((item) => [item.id, item]));
     this.#reindexTitles();
@@ -130,7 +135,9 @@ export class NewsStore extends EventEmitter {
    * 絞り込み＋新しい順のソートを行う。
    * maxPerSource を渡すと、1ソースあたりの件数に上限をかける。記事数の多い
    * 検索フィードが一覧を占領して、件数の少ない専門媒体が押し出されるのを防ぐ。
-   * @param {{category?:string, sourceId?:string, q?:string, hotOnly?:boolean, since?:string, limit?:number, maxPerSource?:number}} filter
+   * minPerSource を渡すと、上限件数で切る前に各ソースの新しい記事を
+   * その数だけ確保する。更新の遅い専門媒体が0件になるのを防ぐ。
+   * @param {{category?:string, sourceId?:string, q?:string, hotOnly?:boolean, since?:string, limit?:number, maxPerSource?:number, minPerSource?:number}} filter
    */
   list({
     category = 'all',
@@ -140,6 +147,7 @@ export class NewsStore extends EventEmitter {
     since = null,
     limit = 100,
     maxPerSource = 0,
+    minPerSource = 0,
   } = {}) {
     const needle = q.trim().toLowerCase();
     const sinceMs = since ? Date.parse(since) : null;
@@ -174,7 +182,24 @@ export class NewsStore extends EventEmitter {
       });
     }
 
-    return limit > 0 ? rows.slice(0, limit) : rows;
+    if (limit <= 0 || rows.length <= limit) return rows;
+
+    if (minPerSource > 0) {
+      // 各ソースの新しい記事をまず確保し、残りの枠を新しい順で埋める
+      const perSource = new Map();
+      const reserved = [];
+      const rest = [];
+      for (const row of rows) {
+        const n = (perSource.get(row.sourceId) || 0) + 1;
+        perSource.set(row.sourceId, n);
+        (n <= minPerSource ? reserved : rest).push(row);
+      }
+      rows = [...reserved, ...rest].slice(0, limit);
+      rows.sort((a, b) => Date.parse(b.publishedAt) - Date.parse(a.publishedAt));
+      return rows;
+    }
+
+    return rows.slice(0, limit);
   }
 
   stats() {

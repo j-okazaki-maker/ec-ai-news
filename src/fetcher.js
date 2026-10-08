@@ -168,6 +168,9 @@ export function passesSourceRules(item, source) {
   // 【PR】付きの広告記事、記事ではないページはどの配信元でも載せない
   if (isAdTitle(item.title) || isNonArticle(item.title)) return false;
 
+  // 除外リストの配信元。Googleニュース経由で入るため、保存済みの記事にも当てる
+  if (isBlockedPublisher(item.source)) return false;
+
   // lang: 'ja' のソースなのに日本語が出てこない記事（海外メディアの転載など）は捨てる
   if ((source.lang || 'ja') === 'ja' && !hasJapanese(item.title)) return false;
 
