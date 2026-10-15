@@ -183,3 +183,25 @@ test('値段つきの商品紹介は noPromo のソースから落とす', async
   assert.equal(passesSourceRules({ title: '楽天グループ決算、売上は2兆円超' }, ascii), true);
   assert.equal(passesSourceRules({ title: 'OpenAI、新しい推論モデルを発表' }, ascii), true);
 });
+
+test('見出し末尾の「（媒体名）」でも除外リストを当てる', async () => {
+  const { passesSourceRules } = await import('../src/fetcher.js');
+  const gnews = { id: 'g', name: 'Googleニュース', category: 'ec', lang: 'ja' };
+
+  // Yahoo!ニュース経由の記事は、配信元が見出しの末尾に入る
+  assert.equal(
+    passesSourceRules(
+      { title: '「置き配（笑）」されたのか…（まいどなニュース）', source: 'Yahoo!ニュース' },
+      gnews,
+    ),
+    false,
+  );
+  // 末尾が媒体名でなければ落とさない
+  assert.equal(
+    passesSourceRules(
+      { title: 'ヤマト運輸、宅配便の取扱実績を発表（2026年9月分）', source: 'Yahoo!ニュース' },
+      gnews,
+    ),
+    true,
+  );
+});

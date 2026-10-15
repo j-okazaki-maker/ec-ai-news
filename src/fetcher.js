@@ -148,6 +148,12 @@ export function extractEntries(xml) {
   return [];
 }
 
+/** 見出し末尾の「（媒体名）」を取り出す。Yahoo!ニュース経由の記事で使う。 */
+function trailingPublisher(title) {
+  const m = String(title || '').match(/[（(]([^（）()]{2,20})[）)]\s*$/);
+  return m ? m[1] : '';
+}
+
 /** ひらがな・カタカナ・漢字のいずれかを含むか（日本語の記事かの簡易判定）。 */
 const JA_CHARS = /[\u3041-\u309f\u30a1-\u30ff\u3400-\u4dbf\u4e00-\u9fff]/;
 export function hasJapanese(text) {
@@ -168,8 +174,11 @@ export function passesSourceRules(item, source) {
   // 【PR】付きの広告記事、記事ではないページはどの配信元でも載せない
   if (isAdTitle(item.title) || isNonArticle(item.title)) return false;
 
-  // 除外リストの配信元。Googleニュース経由で入るため、保存済みの記事にも当てる
-  if (isBlockedPublisher(item.source)) return false;
+  // 除外リストの配信元。Googleニュース経由で入るため、保存済みの記事にも当てる。
+  // Yahoo!ニュースなどは配信元を見出しの末尾「…（まいどなニュース）」に入れるので、そこも見る
+  if (isBlockedPublisher(item.source) || isBlockedPublisher(trailingPublisher(item.title))) {
+    return false;
+  }
 
   // lang: 'ja' のソースなのに日本語が出てこない記事（海外メディアの転載など）は捨てる
   if ((source.lang || 'ja') === 'ja' && !hasJapanese(item.title)) return false;

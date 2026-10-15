@@ -30,6 +30,8 @@ export const BLOCKED_PUBLISHERS = [
   'Mshale', // 動画の転載サイト。見出し末尾にランダムな文字列が付く
   'Vietnam.vn', // ベトナム政府系記事の機械翻訳。日本の業界ニュースではない
   'BUBKA', // グラビア・アイドル情報。「登場」という語でEC検索に引っかかる
+  'まいどなニュース', // 生活雑記。「置き配」などの語で検索に引っかかる
+  'TRILL', // 同上
 ];
 
 export const DEFAULT_SOURCES = [

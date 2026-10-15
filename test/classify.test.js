@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { classify, isAdTitle, isNonArticle } from '../src/classify.js';
+import { classify, isAdTitle, isNonArticle, isConsumerPromo } from '../src/classify.js';
 import { parseFeed } from '../src/fetcher.js';
 
 test('EC と AI の両方に触れる記事は both になる', () => {
@@ -166,4 +166,22 @@ test('写真ギャラリーやSNSのプロフィールページは記事とし�
   // 本物の記事は落とさない
   assert.equal(isNonArticle('ヤマト運輸／9月の小口貨物取扱実績、宅配便は5.3％減'), false);
   assert.equal(isNonArticle('楽天市場、画像生成AIで商品画像を自動作成する新機能'), false);
+});
+
+test('値引き表現のゆれ（％オフ・半額・お買い得）も商品PRとして拾う', () => {
+  const promo = (t) => isConsumerPromo(t);
+
+  assert.equal(promo('これが令和の最新版！「たまごっちパラダイス」が22％オフでお買い得'), true);
+  assert.equal(promo('Microsoft Officeが最大21％オフ！ Amazonプライム感謝祭を見逃すな'), true);
+  assert.equal(promo('新型Fire TV Stick 4Kが早くも半額 プライム感謝祭はAmazonデバイスが安い'), true);
+  assert.equal(promo('『ふらいんぐうぃっち』が50%オフ！【Amazonマンガ週末祭】'), true);
+  // 「10万円」のように万・億・兆をはさむ金額も拾う
+  assert.equal(promo('「スマホに10万円は高すぎる！」Amazonでお買い得、3万円以下から買えるスマホ5選'), true);
+  assert.equal(promo('世界最軽量レベルのノートPC「FMV WU5-K3」が、26万円台！'), true);
+
+  // 金額が出てくる業界ニュースは商品PR扱いしない
+  assert.equal(promo('AIスタートアップが30億円を資金調達'), false);
+  assert.equal(promo('楽天グループ決算、売上は2兆円超'), false);
+  assert.equal(promo('厳しさ増す生協の経営環境 専門家が指摘する“3兆円の総合力”の可能性'), false);
+  assert.equal(promo('国際郵便の料金値上げ＆割引制度見直しまとめ【2027年2月1日改定】'), false);
 });
