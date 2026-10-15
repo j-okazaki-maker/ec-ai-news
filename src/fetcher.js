@@ -1,6 +1,13 @@
 import { XMLParser } from 'fast-xml-parser';
 import { createHash } from 'node:crypto';
-import { classify, isConsumerPromo, isAdTitle, isNonArticle } from './classify.js';
+import {
+  classify,
+  isConsumerPromo,
+  isAdTitle,
+  isNonArticle,
+  isAdultContent,
+  isMarketReportSpam,
+} from './classify.js';
 import { BLOCKED_PUBLISHERS } from './sources.js';
 
 /**
@@ -171,8 +178,10 @@ export function hasJapanese(text) {
 export function passesSourceRules(item, source) {
   if (!source) return false;
 
-  // 【PR】付きの広告記事、記事ではないページはどの配信元でも載せない
+  // 【PR】付きの広告記事、記事ではないページ、アダルト・機械生成スパムは
+  // どの配信元でも載せない
   if (isAdTitle(item.title) || isNonArticle(item.title)) return false;
+  if (isAdultContent(item.title) || isMarketReportSpam(item.title)) return false;
 
   // 除外リストの配信元。Googleニュース経由で入るため、保存済みの記事にも当てる。
   // Yahoo!ニュースなどは配信元を見出しの末尾「…（まいどなニュース）」に入れるので、そこも見る

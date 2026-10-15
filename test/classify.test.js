@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { classify, isAdTitle, isNonArticle, isConsumerPromo } from '../src/classify.js';
+import { classify, isAdTitle, isNonArticle, isConsumerPromo, isAdultContent, isMarketReportSpam } from '../src/classify.js';
 import { parseFeed } from '../src/fetcher.js';
 
 test('EC と AI の両方に触れる記事は both になる', () => {
@@ -184,4 +184,38 @@ test('値引き表現のゆれ（％オフ・半額・お買い得）も商品PR
   assert.equal(promo('楽天グループ決算、売上は2兆円超'), false);
   assert.equal(promo('厳しさ増す生協の経営環境 専門家が指摘する“3兆円の総合力”の可能性'), false);
   assert.equal(promo('国際郵便の料金値上げ＆割引制度見直しまとめ【2027年2月1日改定】'), false);
+});
+
+test('アダルト向けのSEOスパムを落とす', () => {
+  assert.equal(isAdultContent('生成AIエロ画像・エロ動画作成ツール10選｜初心者向けの無料'), true);
+  assert.equal(isAdultContent('AI彼女 作る アプリ'), true);
+  assert.equal(isAdultContent('無料 NSFW AIアニメジェネレーター'), true);
+  assert.equal(isAdultContent('AI Porn Generators 2026購入ガイド：ツールの選び方'), true);
+  assert.equal(isAdultContent('AIコンパニオン 比較 一覧'), true);
+
+  // 「ピエロ」「ヒエログリフ」の「エロ」に反応しないこと
+  assert.equal(isAdultContent('ピエロの衣装を販売するECサイトが開店'), false);
+  assert.equal(isAdultContent('ヒエログリフをAIで解読する研究が進む'), false);
+  assert.equal(isAdultContent('OpenAIが新モデルを発表'), false);
+});
+
+test('機械生成の市場調査レポート記事を落とす', () => {
+  assert.equal(
+    isMarketReportSpam('B2B（企業間）EC市場の成長予測 2026年〜2033年：売上高、市場シェア、競争環境'),
+    true,
+  );
+  assert.equal(
+    isMarketReportSpam('日本のEコマース市場規模、2034年までに7,018億米ドルに到達へ（年平均成長率10.15%）'),
+    true,
+  );
+  assert.equal(isMarketReportSpam('自律移動ロボット市場シェア上位メーカー'), true);
+  assert.equal(
+    isMarketReportSpam('サービスとしての配送 市場は、2025年から2036年の予測期間において…'),
+    true,
+  );
+
+  // 年号が入るだけの普通の記事は落とさない
+  assert.equal(isMarketReportSpam('【EC利用実態調査2026】生成AIショッピングアシスタントの認知率'), false);
+  assert.equal(isMarketReportSpam('国際郵便の料金値上げまとめ【2027年2月1日改定】'), false);
+  assert.equal(isMarketReportSpam('2026年の年末商戦、EC各社の施策まとめ'), false);
 });

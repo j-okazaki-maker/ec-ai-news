@@ -227,3 +227,15 @@ test('eventOnly のソースでも EC×AI の記事は通す', async () => {
   // EC・AIに関係ない記事は引き続き落とす
   assert.equal(passesSourceRules({ title: '京都で香水づくり体験を開催' }, pr), false);
 });
+
+test('アダルトスパム・市場レポートスパムはどの配信元でも落とす', async () => {
+  const { passesSourceRules } = await import('../src/fetcher.js');
+  const gnews = { id: 'g', name: 'Googleニュース', category: 'ai', lang: 'ja' };
+
+  assert.equal(passesSourceRules({ title: 'AI彼女 アプリ 人気ランキング', source: 'どこかの大学' }, gnews), false);
+  assert.equal(
+    passesSourceRules({ title: 'EC市場の成長予測 2026年〜2033年：売上高、市場シェア', source: 'pando.life' }, gnews),
+    false,
+  );
+  assert.equal(passesSourceRules({ title: 'OpenAIが新しい推論モデルを発表', source: 'ITmedia' }, gnews), true);
+});

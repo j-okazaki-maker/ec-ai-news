@@ -33,6 +33,16 @@ export const BLOCKED_PUBLISHERS = [
   'BUBKA', // グラビア・アイドル情報。「登場」という語でEC検索に引っかかる
   'まいどなニュース', // 生活雑記。「置き配」などの語で検索に引っかかる
   'TRILL', // 同上
+  // --- Googleニュースに紛れ込むスパム・無関係サイト ---
+  'Universidad de Córdoba', // 大学ドメインを乗っ取ったアダルトSEOスパム
+  'vrfeeds', // VTuber・動画の転載アグリゲーター
+  'Howl.link', // 同上
+  'pando.life', // 機械生成の市場調査レポート
+  'IndexBox', // 同上
+  '楽天ブログ', // 個人・自治体のブログ記事
+  'YouTube', // 動画。ニュース記事ではない
+  '麻雀ウォッチ', // ゲーム情報
+  'Jetstream', // 通販の値引き告知
 ];
 
 export const DEFAULT_SOURCES = [
