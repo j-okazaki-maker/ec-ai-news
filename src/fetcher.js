@@ -281,7 +281,14 @@ export async function fetchSource(
     const xml = await res.text();
     const items = parseFeed(xml, source);
     const result = { sourceId: source.id, ok: true, items, ms: Date.now() - startedAt };
-    if (includeRaw) result.rawItems = parseFeed(xml, source, { applyRules: false });
+    if (includeRaw) {
+      result.rawItems = parseFeed(xml, source, { applyRules: false });
+      // 記事が取れなかったとき、フィードではなくWebページを取ってきたのか判別できるように
+      if (result.rawItems.length === 0) {
+        const m = xml.match(/<title[^>]*>([\s\S]{0,300}?)<\/title>/i);
+        if (m) result.pageTitle = stripHtml(m[1]).trim().slice(0, 200);
+      }
+    }
     return result;
   } catch (err) {
     const error = err?.name === 'TimeoutError' ? `タイムアウト (${timeoutMs}ms)` : String(err?.message || err);

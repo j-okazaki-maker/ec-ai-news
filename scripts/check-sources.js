@@ -56,6 +56,8 @@ for (const source of targets) {
   if (raw.length === 0) {
     ng += 1;
     console.log(`△ ${source.id}  取得できたが記事が0件（形式が違う可能性）  ${source.url}`);
+    // フィードではなく普通のWebページだったときに、何を取ってきたのか分かるようにする
+    if (res.pageTitle) console.log(`    ページの題名: ${res.pageTitle}`);
     continue;
   }
 
