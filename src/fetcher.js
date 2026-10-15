@@ -187,8 +187,10 @@ export function passesSourceRules(item, source) {
 
   // filter: EC・AI を名指しする語が出てこない記事を捨てる
   if (source.filter && strong.ec === 0 && strong.ai === 0) return false;
-  // eventOnly: 企業・市場が動いた記事だけを拾う
-  if (source.eventOnly && events === 0) return false;
+  // eventOnly: 企業・市場が動いた記事だけを拾う。
+  // ただし EC と AI の両方を名指しする記事は、このサイトの主題そのものなので
+  // 「動き」がなくても通す（例: ECカートのAI機能追加のお知らせ）
+  if (source.eventOnly && events === 0 && !(strong.ec > 0 && strong.ai > 0)) return false;
   // noPromo: 消費者向けの商品PR（セール告知・新商品紹介）を捨てる
   if (source.noPromo && isConsumerPromo(item.title)) return false;
   return true;

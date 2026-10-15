@@ -205,3 +205,25 @@ test('見出し末尾の「（媒体名）」でも除外リストを当てる',
     true,
   );
 });
+
+test('eventOnly のソースでも EC×AI の記事は通す', async () => {
+  const { passesSourceRules } = await import('../src/fetcher.js');
+  const pr = { id: 'pr', name: 'PR TIMES', category: 'ec', lang: 'ja', filter: true, eventOnly: true };
+
+  // ECとAIの両方に当たる記事は「動き」がなくても通す
+  assert.equal(
+    passesSourceRules(
+      { title: '「BASE」のAI機能がバージョンアップ！ネットショップ運営の疑問はAIに相談！' },
+      pr,
+    ),
+    true,
+  );
+
+  // AIだけ・ECだけの宣伝リリースは、これまでどおり「動き」がないと落とす
+  assert.equal(passesSourceRules({ title: 'AI-OCRのデモ動画を公開！すぐに使える新サービス' }, pr), false);
+  assert.equal(passesSourceRules({ title: 'ネットショップ向けテンプレートを公開しました' }, pr), false);
+  assert.equal(passesSourceRules({ title: 'AI-OCRを手がけるA社がB社と資本提携' }, pr), true);
+
+  // EC・AIに関係ない記事は引き続き落とす
+  assert.equal(passesSourceRules({ title: '京都で香水づくり体験を開催' }, pr), false);
+});
