@@ -158,13 +158,29 @@ export function isMarketReportSpam(title) {
  * 記事ではないページの見出し。Googleニュースは写真ギャラリーの1枚や
  * SNSのプロフィールページも記事として流してくる。
  */
-const GALLERY_TITLE = /^[＜<]?\s*画像\s*\d+\s*[/／]\s*\d+/;
+const GALLERY_TITLE = [
+  /^[＜<]?\s*画像\s*\d+\s*[/／]\s*\d+/, // 「画像294 / 315＞…」
+  /^\s*画像・写真\s*[|｜]/, // オリコンなど「画像・写真 | …」
+  /\s\d+\s*枚目\s*$/, // 「… 18枚目」
+  /^\s*(?:フォト|写真)(?:ギャラリー|特集)/,
+];
 const SNS_PROFILE_TITLE = /\(@[A-Za-z0-9_]+\)\s*on\s*(X|Twitter|Instagram)$/i;
 
 /** 記事ではないページ（写真ギャラリー・SNSプロフィール）の見出しかどうか。 */
 export function isNonArticle(title) {
   const t = String(title || '');
-  return GALLERY_TITLE.test(t) || SNS_PROFILE_TITLE.test(t);
+  return GALLERY_TITLE.some((re) => re.test(t)) || SNS_PROFILE_TITLE.test(t);
+}
+
+/**
+ * 芸能ゴシップの見出し。EC・AIの業界ニュースには出てこない語だけを並べる。
+ * 検索フィードが本文中の「通販」などに反応して拾ってしまうため。
+ */
+const GOSSIP_WORDS = /グラビア|写真集|熱愛/;
+
+/** 芸能ゴシップの見出しかどうか。 */
+export function isGossipTitle(title) {
+  return GOSSIP_WORDS.test(String(title || ''));
 }
 
 export function isConsumerPromo(title) {

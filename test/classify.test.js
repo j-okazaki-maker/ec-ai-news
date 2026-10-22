@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { classify, isAdTitle, isNonArticle, isConsumerPromo, isAdultContent, isMarketReportSpam } from '../src/classify.js';
+import { classify, isAdTitle, isNonArticle, isConsumerPromo, isAdultContent, isMarketReportSpam, isGossipTitle } from '../src/classify.js';
 import { parseFeed } from '../src/fetcher.js';
 
 test('EC と AI の両方に触れる記事は both になる', () => {
@@ -218,4 +218,23 @@ test('機械生成の市場調査レポート記事を落とす', () => {
   assert.equal(isMarketReportSpam('【EC利用実態調査2026】生成AIショッピングアシスタントの認知率'), false);
   assert.equal(isMarketReportSpam('国際郵便の料金値上げまとめ【2027年2月1日改定】'), false);
   assert.equal(isMarketReportSpam('2026年の年末商戦、EC各社の施策まとめ'), false);
+});
+
+test('写真ギャラリーのページ（オリコンなど）を記事として扱わない', () => {
+  assert.equal(isNonArticle('画像・写真 | 櫻坂46松本和子、自身初ソログラビア 18枚目'), true);
+  assert.equal(isNonArticle('画像・写真 | 卒業発表の“キャプテン”が思い語る 18枚目'), true);
+  assert.equal(isNonArticle('フォトギャラリー：東京ゲームショウ2026'), true);
+
+  // 「枚」が本文の数字として出てくる記事は落とさない
+  assert.equal(isNonArticle('ZOZOTOWN、限定Tシャツを全10型で販売'), false);
+  assert.equal(isNonArticle('リカバリーウェアReD累計出荷枚数300万枚を突破'), false);
+});
+
+test('芸能ゴシップの見出しを落とす', () => {
+  assert.equal(isGossipTitle('櫻坂46松本和子、自身初ソログラビア'), true);
+  assert.equal(isGossipTitle('人気タレントの写真集が発売'), true);
+  assert.equal(isGossipTitle('俳優Aと女優Bの熱愛が発覚'), true);
+
+  assert.equal(isGossipTitle('楽天市場、出店企業向けの新機能を提供開始'), false);
+  assert.equal(isGossipTitle('OpenAIが新しい推論モデルを発表'), false);
 });
