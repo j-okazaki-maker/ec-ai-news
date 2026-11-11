@@ -43,6 +43,19 @@ export const BLOCKED_PUBLISHERS = [
   'YouTube', // 動画。ニュース記事ではない
   '麻雀ウォッチ', // ゲーム情報
   'Jetstream', // 通販の値引き告知
+  // --- 検索フィードに混ざる、業界ニュースではない媒体 ---
+  'オリコンニュース', // 芸能・グラビア
+  '東スポWEB', // スポーツ・芸能
+  'CanCam.jp', // 女性誌の連載
+  'Dtimes', // アイドル雑誌の告知
+  'シクロワイアード', // 自転車レース
+  'great G-SHOCK world', // 通販ランキングの個人ブログ
+  'Auto Messe Web', // 自動車DIY
+  'autosport web', // モータースポーツ
+  // --- 海外メディアの、その国の国内ニュースの機械翻訳 ---
+  'Laodong.vn',
+  'VOI.ID',
+  '매일경제',
 ];
 
 export const DEFAULT_SOURCES = [
@@ -84,10 +97,12 @@ export const DEFAULT_SOURCES = [
   {
     id: 'logi-today',
     name: 'LOGISTICS TODAY',
-    url: 'https://www.logi-today.com/feed',
+    // 2026年10月下旬に本家のRSS（/feed）が消えた（404）。/feed/ /rss /index.rdf
+    // ?feed=rss2 もすべてダメだったので、Googleニュースのサイト内検索で代替する。
+    url: 'https://news.google.com/rss/search?q=%28%E7%89%A9%E6%B5%81%20OR%20%E5%80%89%E5%BA%AB%20OR%20%E5%AE%85%E9%85%8D%29%20site%3Alogi-today.com%20when%3A7d&hl=ja&gl=JP&ceid=JP:ja',
     category: 'ec',
     lang: 'ja',
-    filter: true,
+    filter: true, // 物流全般の媒体なので、EC・配送まわりの記事だけ拾う
     enabled: true,
   },
   {

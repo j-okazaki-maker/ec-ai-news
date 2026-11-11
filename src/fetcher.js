@@ -8,6 +8,7 @@ import {
   isAdultContent,
   isMarketReportSpam,
   isGossipTitle,
+  isMerchCollab,
 } from './classify.js';
 import { BLOCKED_PUBLISHERS } from './sources.js';
 
@@ -183,7 +184,7 @@ export function passesSourceRules(item, source) {
   // どの配信元でも載せない
   if (isAdTitle(item.title) || isNonArticle(item.title)) return false;
   if (isAdultContent(item.title) || isMarketReportSpam(item.title)) return false;
-  if (isGossipTitle(item.title)) return false;
+  if (isGossipTitle(item.title) || isMerchCollab(item.title)) return false;
 
   // 除外リストの配信元。Googleニュース経由で入るため、保存済みの記事にも当てる。
   // Yahoo!ニュースなどは配信元を見出しの末尾「…（まいどなニュース）」に入れるので、そこも見る

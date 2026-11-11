@@ -94,7 +94,7 @@ const HOT_KEYWORDS = [
 const PROMO_WORDS = new RegExp(
   [
     '新発売|発売|販売開始|予約受付|予約開始|新商品|先行販売|好評発売中|新登場|登場！',
-    'セール|感謝祭|週末祭|クーポンを利用|キャンペーン|プレゼント|クラウドファンディング',
+    'セール|感謝祭|週末祭|クーポンを利用|キャンペーン|プレゼント|クラウドファンディング|抽選販売',
     // 値引き表現。「22％オフ」「50%OFF」「最大21％オフ」「半額」など
     '[％%]\\s*(?:オフ|OFF|off)|[0-9０-９]+\\s*[％%]\\s*引き|割引|半額|お買い得|お得|値引き|激安|タイムセール',
     'ポイント[0-9０-９]+倍|送料無料|税込|数量限定|Amazon限定|楽天限定|限定で登場|[0-9０-９]+台限定',
@@ -170,6 +170,17 @@ const SNS_PROFILE_TITLE = /\(@[A-Za-z0-9_]+\)\s*on\s*(X|Twitter|Instagram)$/i;
 export function isNonArticle(title) {
   const t = String(title || '');
   return GALLERY_TITLE.some((re) => re.test(t)) || SNS_PROFILE_TITLE.test(t);
+}
+
+/**
+ * キャラクター・アーティストとのコラボグッズ告知。同じ1件が何社にも
+ * 転載されるため、配信元を名指しするより語で落とすほうが確実。
+ */
+const MERCH_COLLAB = /コラボ(?:アイテム|グッズ|商品|コレクション)|グッズ受注|描き下ろし/;
+
+/** コラボグッズの告知かどうか。 */
+export function isMerchCollab(title) {
+  return MERCH_COLLAB.test(String(title || ''));
 }
 
 /**

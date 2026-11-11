@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { classify, isAdTitle, isNonArticle, isConsumerPromo, isAdultContent, isMarketReportSpam, isGossipTitle } from '../src/classify.js';
+import { classify, isAdTitle, isNonArticle, isConsumerPromo, isAdultContent, isMarketReportSpam, isGossipTitle, isMerchCollab } from '../src/classify.js';
 import { parseFeed } from '../src/fetcher.js';
 
 test('EC と AI の両方に触れる記事は both になる', () => {
@@ -237,4 +237,25 @@ test('芸能ゴシップの見出しを落とす', () => {
 
   assert.equal(isGossipTitle('楽天市場、出店企業向けの新機能を提供開始'), false);
   assert.equal(isGossipTitle('OpenAIが新しい推論モデルを発表'), false);
+});
+
+test('キャラクターとのコラボグッズ告知を落とす', () => {
+  // 同じ1件が8社に転載されていたため、配信元ではなく語で落とす
+  assert.equal(isMerchCollab('人気VTuberグループがZOZOTOWNとコラボ決定！コラボアイテムは受注販売'), true);
+  assert.equal(isMerchCollab('あおぎり高校 × ZOZOTOWN 11月12日よりグッズ受注開始!'), true);
+  assert.equal(isMerchCollab('「あおぎり高校」×ZOZOTOWN 音霊魂子らの描き下ろしも'), true);
+  assert.equal(isMerchCollab('【写真2】期間限定で販売されるF1とZOZOTOWNのコラボアイテム'), true);
+
+  // 企業間の提携・協業のニュースは落とさない
+  assert.equal(isMerchCollab('楽天とファミリーマートが物流で協業'), false);
+  assert.equal(isMerchCollab('ZOZO、AI採寸の新機能を提供開始'), false);
+  assert.equal(isMerchCollab('アプリメンバーズがShopifyとポイント連携'), false);
+});
+
+test('抽選販売の告知は商品PRとして落とす', () => {
+  assert.equal(
+    isConsumerPromo('イトーヨーカドーネット通販で「なめらかクリームシチュー」が11月9日から抽選販売スタート'),
+    true,
+  );
+  assert.equal(isConsumerPromo('楽天グループ、物流拠点の新設を発表'), false);
 });
